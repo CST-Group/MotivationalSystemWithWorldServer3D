@@ -1,0 +1,12 @@
+# Created by .ignore br.unicamp.mtwsapp.support plugin (hsz.mobi)
+.idea
+.idea/MotivationalSystemWithWorldServer3D.iml
+.idea/modules.xml
+.idea/workspace.xml
+build/empty/
+build/generated-sources/
+test/
+dist
+MotivationalSystemWithWorldServer3D.iml
+out
+
