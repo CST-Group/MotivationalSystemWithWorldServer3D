@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/Users/Du/Repository/DemoCST/src/democst/AgentMind.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/democst/ExperimentMain.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/democst/Environment.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/perception/ClosestObstacleDetector.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/AvoidColisionObstacle.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/GoToJewel.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/GoToApple.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/Forage.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/perception/JewelDetector.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/perception/ClosestJewelDetector.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/GetClosestJewel.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/behaviors/EatClosestApple.java</file>
+            <file>file:/Users/Du/Repository/DemoCST/src/codelets/motor/LegsActionCodelet.java</file>
+        </group>
+    </open-files>
+</project-private>
