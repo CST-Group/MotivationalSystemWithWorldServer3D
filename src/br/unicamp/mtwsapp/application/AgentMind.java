@@ -261,10 +261,17 @@ public class AgentMind extends Mind {
 
         Codelet avoidColisionObstacle = new AvoidColisionObstacle();
         MemoryObject legsAvoidColisionMO = createMemoryObject("LEGS_AVOID_DANGER");
+        MemoryObject handsAvoidColisionMO = createMemoryObject("HANDS_AVOID_DANGER");
+        avoidColisionObstacle.addInput(knownJewelsMO);
+        //avoidColisionObstacle.addInput(legsGoJewelMO);
+        //avoidColisionObstacle.addInput(legsGoAppleMO);
+        //avoidColisionObstacle.addInput(handsEatAppleMO);
+        //avoidColisionObstacle.addInput(handsGetJewelMO);
         avoidColisionObstacle.addInput(outputAvoidDangerDriveMO);
         avoidColisionObstacle.addInput(closestObstacleMO);
         avoidColisionObstacle.addInput(innerSenseMO);
         avoidColisionObstacle.addOutput(legsAvoidColisionMO);
+        avoidColisionObstacle.addOutput(handsAvoidColisionMO);
         insertCodelet(avoidColisionObstacle);
 
         // Create Actuator Codelets
@@ -280,6 +287,7 @@ public class AgentMind extends Mind {
         MemoryContainer handsBehaviorMC = createMemoryContainer("BEHAVIORS_MC");
         handsBehaviorMC.add(handsEatAppleMO);
         handsBehaviorMC.add(handsGetJewelMO);
+        handsBehaviorMC.add(handsAvoidColisionMO);
         hands.addInput(handsBehaviorMC);
         insertCodelet(hands);
 

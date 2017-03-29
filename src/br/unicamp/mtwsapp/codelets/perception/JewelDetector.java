@@ -33,11 +33,11 @@ public class JewelDetector extends Codelet {
     @Override
     public void accessMemoryObjects() {
         synchronized (this) {
-            if(visionMO == null)
+            if (visionMO == null)
                 this.visionMO = (MemoryObject) this.getInput("VISION");
         }
 
-        if(knownJewelsMO == null)
+        if (knownJewelsMO == null)
             this.knownJewelsMO = (MemoryObject) this.getOutput("KNOWN_JEWELS");
     }
 
@@ -50,7 +50,7 @@ public class JewelDetector extends Codelet {
                 vision = new CopyOnWriteArrayList((List<Thing>) visionMO.getI());
                 known = Collections.synchronizedList((List<Thing>) knownJewelsMO.getI());
 
-                if(vision.size() != 0) {
+                if (vision.size() != 0) {
                     Comparator<Thing> comparator = new Comparator<Thing>() {
                         @Override
                         public int compare(Thing thing1, Thing thing2) {
@@ -76,16 +76,11 @@ public class JewelDetector extends Codelet {
                                 }
                                 if (found == false && t.getName().contains("Jewel")) {
                                     for (Leaflet leaflet : creature.getLeaflets()) {
-                                        if ((creature.getAttributes().getFuel() / 1000) >= 0.4) {
-                                            if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
-                                                known.add(t);
-                                                break;
-                                            }
-                                        } else {
+                                        if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
                                             known.add(t);
+                                            break;
                                         }
                                     }
-
                                 }
                             }
 

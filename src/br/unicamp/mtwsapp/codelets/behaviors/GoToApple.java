@@ -37,6 +37,8 @@ public class GoToApple extends Codelet {
 
         if (legsMO == null)
             legsMO = (MemoryObject) this.getOutput("LEGS_GO_APPLE");
+
+
     }
 
     @Override

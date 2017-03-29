@@ -82,11 +82,18 @@ public class LegsActionCodelet extends Codelet {
                         int random = rand.nextInt(3);
 
                         if (random == 2) {
-                            c.move(3, 3, c.getPitch() + Math.toRadians(-90));
+                            c.move(0, 0, c.getPitch() + Math.toRadians(-90));
+                            Thread.sleep(100);
+                            c.move(3, 3, c.getPitch() + Math.toRadians(0));
+
                         } else if (random == 1) {
-                            c.move(3, 3, c.getPitch() + Math.toRadians(90));
+                            c.move(0, 0, c.getPitch() + Math.toRadians(90));
+                            Thread.sleep(100);
+                            c.move(3, 3, c.getPitch() + Math.toRadians(0));
                         } else {
-                            c.move(3, 3, c.getPitch() + Math.toRadians(180));
+                            c.move(0, 0, c.getPitch() + Math.toRadians(180));
+                            Thread.sleep(100);
+                            c.move(3, 3, c.getPitch() + Math.toRadians(0));
                         }
                         Thread.sleep(500);
 

@@ -56,10 +56,14 @@ public class ClosestObstacleDetector extends Codelet {
                 //Iterate over objects in vision, looking for the closest apple
                 CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
                 for (Thing t : myknown) {
-                    String objectName = t.getName();
-                    if (objectName.contains("Brick")) {
+                    //String objectName = t.getName();
+                    if(isNear(t, reachDistance) != null){
                         closest_obstacle = isNear(t, reachDistance);
                     }
+
+                    /*if (objectName.contains("Brick")) {
+                        closest_obstacle = isNear(t, reachDistance);
+                    }*/
                 }
 
                 if (closest_obstacle != null) {
