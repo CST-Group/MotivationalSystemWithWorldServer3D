@@ -1,4 +1,4 @@
-package br.unicamp.mtwsapp.codelets.behaviors;
+package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;

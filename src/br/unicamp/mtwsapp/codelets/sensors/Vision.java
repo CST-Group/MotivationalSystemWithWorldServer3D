@@ -3,6 +3,7 @@ package br.unicamp.mtwsapp.codelets.sensors;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
@@ -31,7 +32,8 @@ public class Vision extends Codelet {
     public void proc() {
         c.updateState();
         synchronized (visionMO) {
-            List<Thing> lt = c.getThingsInVision();
+            List<Thing> lt = new ArrayList<>();
+            lt.addAll(c.getThingsInVision());
             visionMO.setI(lt);
         }
     }

@@ -87,10 +87,11 @@ public class MindView extends javax.swing.JFrame {
             }   
         text.setText(alltext);
         j++;
-        if (j == 40) {
+        if (j == 200) {
             try {
+                Random random = new Random();
                 World.createJewel(0, r.nextInt(800) , r.nextInt(600));
-                World.createFood(0,r.nextInt(800) , r.nextInt(600));
+                //World.createFood(random.nextInt(2),r.nextInt(800) , r.nextInt(600));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -162,7 +163,7 @@ public class MindView extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 MindView mv;
-                mv = new MindView("Teste");
+                mv = new MindView("Motivational Creature");
                 mv.setVisible(true);
                 mv.StartTimer();
             }

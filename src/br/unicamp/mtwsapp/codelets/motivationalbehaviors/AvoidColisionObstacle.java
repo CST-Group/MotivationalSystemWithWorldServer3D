@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.unicamp.mtwsapp.codelets.behaviors;
+package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
 import br.unicamp.cst.core.entities.Codelet;
-import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
@@ -32,9 +31,7 @@ public class AvoidColisionObstacle extends Codelet {
     private MemoryObject legsMO;
     private MemoryObject handsMO;
     private MemoryObject knownJewelsMO;
-
-
-    private Creature creature;
+    private MemoryObject hiddenObjectsMO;
 
     Thing closestObstacle;
     CreatureInnerSense cis;
@@ -62,6 +59,9 @@ public class AvoidColisionObstacle extends Codelet {
 
         if(knownJewelsMO == null)
             knownJewelsMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
+
+        if(hiddenObjectsMO == null)
+            hiddenObjectsMO = (MemoryObject) this.getOutput("HIDDEN_THINGS");
 
 
     }
@@ -140,17 +140,34 @@ public class AvoidColisionObstacle extends Codelet {
                 else{
                     try {
                         message.put("OBJECT", closestObstacle.getName());
-                        message.put("ACTION", "EATIT");
+                        message.put("ACTION", "BURY");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+
+
+                    closestObstacle.hidden = true;
+
+                    List<Thing> things = (List<Thing>) hiddenObjectsMO.getI();
+
+                    if(things.size() == 0 )
+                    {
+                        things.add(closestObstacle);
+                    }
+                    else {
+                        for (int i = 0; i < things.size(); i++) {
+                            if (!things.get(i).getName().equals(closestObstacle.getName())) {
+                                things.add(closestObstacle);
+                            }
+                        }
+                    }
+
                     handsMO.setEvaluation(getActivation());
                     handsMO.setI(message.toString());
+
                     legsMO.setEvaluation(getActivation());
                     legsMO.setI("");
                 }
-
-
             }
         } else {
             legsMO.setEvaluation(getActivation());

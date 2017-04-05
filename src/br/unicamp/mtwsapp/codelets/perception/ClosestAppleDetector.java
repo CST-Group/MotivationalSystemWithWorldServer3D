@@ -2,6 +2,8 @@ package br.unicamp.mtwsapp.codelets.perception;
 
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
+
+import java.util.Collection;
 import java.util.Collections;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import java.util.List;
@@ -23,6 +25,7 @@ public class ClosestAppleDetector extends Codelet {
     private final int reachDistance;
     private final Creature creature;
 
+
     public ClosestAppleDetector(Creature creature, int reachDistance) {
         this.reachDistance = reachDistance;
         this.creature = creature;
@@ -38,20 +41,22 @@ public class ClosestAppleDetector extends Codelet {
 
         if(closestAppleMO==null)
             this.closestAppleMO = (MemoryObject) this.getOutput("CLOSEST_APPLE");
+
+
     }
 
     @Override
     public void proc() {
         Thing closest_apple = null;
         known = Collections.synchronizedList((List<Thing>) knownMO.getI());
-        CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
+
         synchronized (known) {
             if (known.size() != 0) {
-                //Iterate over objects in vision, looking for the closest apple
+                //Iterate over objects in vision, looking for the closest a pple
                 CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
                 for (Thing t : myknown) {
                     String objectName = t.getName();
-                    if (objectName.contains("PFood") && !objectName.contains("NPFood")) { //Then, it is an apple
+                    if (objectName.contains("PFood") || objectName.contains("NPFood")) {
 
                         double Dnew = creature.calculateDistanceTo(t);
 

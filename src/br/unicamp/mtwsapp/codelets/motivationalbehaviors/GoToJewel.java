@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.unicamp.mtwsapp.codelets.behaviors;
+package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
@@ -103,6 +103,7 @@ public class GoToJewel extends Codelet {
                     JSONObject message = new JSONObject();
                     try {
 
+
                         message.put("ACTION", "GOTO");
                         message.put("X", (int) jewelX);
                         message.put("Y", (int) jewelY);
@@ -115,6 +116,7 @@ public class GoToJewel extends Codelet {
                     }
                 }
                 else{
+
                     JSONObject message = new JSONObject();
                     try {
                         message.put("ACTION", "FORAGE");

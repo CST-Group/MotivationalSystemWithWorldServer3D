@@ -2,15 +2,19 @@ package br.unicamp.mtwsapp.codelets.motor;
 
 
 import br.unicamp.cst.core.entities.MemoryContainer;
+import br.unicamp.cst.core.entities.MemoryObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import br.unicamp.cst.core.entities.Codelet;
 
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import ws3dproxy.CommandExecException;
 import ws3dproxy.model.Creature;
+import ws3dproxy.model.Thing;
 
 /**
  * @author Du
@@ -19,6 +23,7 @@ import ws3dproxy.model.Creature;
 public class HandsActionCodelet extends Codelet {
 
     private MemoryContainer behaviorsMC;
+    private MemoryObject hiddenApplesMO;
 
     private String previousHandsAction = "";
     private Creature c;
@@ -33,6 +38,11 @@ public class HandsActionCodelet extends Codelet {
     public void accessMemoryObjects() {
         if(behaviorsMC == null)
             behaviorsMC = (MemoryContainer) this.getInput("BEHAVIORS_MC");
+
+        if (hiddenApplesMO == null)
+            hiddenApplesMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
+
+
     }
 
     public void proc() {
@@ -54,7 +64,7 @@ public class HandsActionCodelet extends Codelet {
                                 } catch (Exception e) {
 
                                 }
-                                log.info("Sending Put In Sack command to agent:****** " + objectName + "**********");
+                                log.info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
 
                             }
                             if (action.equals("EATIT")) {
@@ -64,7 +74,7 @@ public class HandsActionCodelet extends Codelet {
 
                                 }
 
-                                log.info("Sending Eat command to agent:****** " + objectName + "**********");
+                                log.info("Sending EAT command to agent:****** " + objectName + "**********");
                             }
                             if (action.equals("BURY")) {
                                 try {
@@ -73,8 +83,30 @@ public class HandsActionCodelet extends Codelet {
 
                                 }
 
-                                log.info("Sending Bury command to agent:****** " + objectName + "**********");
+                                log.info("Sending BURY command to agent:****** " + objectName + "**********");
                             }
+                            if(action.equals("UNEARTH")){
+
+                                try {
+                                    c.unhideIt(objectName);
+                                    c.eatIt(objectName);
+                                } catch (CommandExecException e) {
+                                    e.printStackTrace();
+                                }
+
+                                List<Thing> things = (List<Thing>) hiddenApplesMO.getI();
+
+                                for (int i = 0; i < things.size(); i++) {
+                                    if (things.get(i).getName().equals(objectName)) {
+                                        things.get(i).hidden = false;
+                                        break;
+                                    }
+                                }
+
+                                log.info("Sending UNEARTH command to agent:****** " + objectName + "**********");
+                            }
+
+
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

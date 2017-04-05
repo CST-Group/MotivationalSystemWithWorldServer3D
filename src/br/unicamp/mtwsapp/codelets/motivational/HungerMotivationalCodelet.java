@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * Created by du on 22/03/17.
  */
-public class HungryMotivationalCodelet extends MotivationalCodelet {
-    public HungryMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
+public class HungerMotivationalCodelet extends MotivationalCodelet {
+    public HungerMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
         super(name, level, priority, urgencyThreshold);
     }
 

@@ -1,7 +1,8 @@
-package br.unicamp.mtwsapp.codelets.behaviors;
+package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.List;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
@@ -23,6 +24,7 @@ public class EatClosestApple extends Codelet {
     private MemoryObject closestAppleMO;
     private MemoryObject innerSenseMO;
     private MemoryObject drivesMO;
+    private MemoryObject hiddenApplesMO;
     private int reachDistance;
     private MemoryObject handsMO;
     Thing closestApple;
@@ -46,6 +48,9 @@ public class EatClosestApple extends Codelet {
 
         if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_EAT_APPLE");
+
+        if (hiddenApplesMO == null)
+            hiddenApplesMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
 
     }
 
@@ -114,11 +119,19 @@ public class EatClosestApple extends Codelet {
             double distance = pSelf.distance(pApple);
             JSONObject message = new JSONObject();
             try {
-                if (distance < reachDistance) { //eat it						
-                    message.put("OBJECT", appleName);
-                    message.put("ACTION", "EATIT");
-                    handsMO.setEvaluation(getActivation());
-                    handsMO.setI(message.toString());
+                if (distance < reachDistance) { //eat it
+                    if(closestApple.hidden){
+                        message.put("OBJECT", appleName);
+                        message.put("ACTION", "UNEARTH");
+                        handsMO.setEvaluation(getActivation());
+                        handsMO.setI(message.toString());
+                    }
+                    else {
+                        message.put("OBJECT", appleName);
+                        message.put("ACTION", "EATIT");
+                        handsMO.setEvaluation(getActivation());
+                        handsMO.setI(message.toString());
+                    }
 
                 } else {
                     handsMO.setEvaluation(getActivation());

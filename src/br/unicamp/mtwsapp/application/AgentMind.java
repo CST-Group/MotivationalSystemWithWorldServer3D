@@ -1,18 +1,14 @@
 package br.unicamp.mtwsapp.application;
 
-import br.unicamp.cst.behavior.subsumption.SubsumptionArchitecture;
 import br.unicamp.cst.core.entities.*;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import br.unicamp.cst.motivational.MotivationalCodelet;
 import br.unicamp.cst.motivational.MotivationalSubsystemViewer;
-import br.unicamp.mtwsapp.codelets.behaviors.AvoidColisionObstacle;
-import br.unicamp.mtwsapp.codelets.behaviors.EatClosestApple;
-import br.unicamp.mtwsapp.codelets.behaviors.GetClosestJewel;
-import br.unicamp.mtwsapp.codelets.behaviors.GoToApple;
-import br.unicamp.mtwsapp.codelets.behaviors.GoToJewel;
+import br.unicamp.mtwsapp.codelets.motivational.BoredomMotivationalCodelet;
+import br.unicamp.mtwsapp.codelets.motivationalbehaviors.*;
 import br.unicamp.mtwsapp.codelets.motivational.AvoidDangerMotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.motivational.CuriosityMotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.motivational.HungryMotivationalCodelet;
+import br.unicamp.mtwsapp.codelets.motivational.AmbitionMotivationalCodelet;
+import br.unicamp.mtwsapp.codelets.motivational.HungerMotivationalCodelet;
 import br.unicamp.mtwsapp.codelets.motor.HandsActionCodelet;
 import br.unicamp.mtwsapp.codelets.motor.LegsActionCodelet;
 import br.unicamp.mtwsapp.codelets.perception.AppleDetector;
@@ -44,9 +40,10 @@ public class AgentMind extends Mind {
         super();
 
         // Declare Motivational Codelets
-        Codelet hungryMotivationalCodelet = null;
+        Codelet hungerMotivationalCodelet = null;
         Codelet avoidDangerMotivationalCodelet = null;
-        Codelet curiosityMotivationalCodelet = null;
+        Codelet ambitionMotivationalCodelet = null;
+        Codelet boredomMotivationalCodelet = null;
 
 
         // Declare Memory Objects
@@ -58,12 +55,10 @@ public class AgentMind extends Mind {
         MemoryObject knownApplesMO;
         MemoryObject closestJewelMO;
         MemoryObject knownJewelsMO;
-        MemoryObject leafletMO;
         MemoryObject closestObstacleMO;
+        MemoryObject hiddenObjetecsMO;
         int reachDistance = 65;
-        int brickDistance = 60;
-
-        SubsumptionArchitecture subsumptionArchitecture = new SubsumptionArchitecture(this);
+        int brickDistance = 40;
 
         //Initialize Memory Objects
         legsMO = createMemoryObject("LEGS", "");
@@ -89,6 +84,9 @@ public class AgentMind extends Mind {
 
         List<Thing> knownJewels = Collections.synchronizedList(new ArrayList<Thing>());
         knownJewelsMO = createMemoryObject("KNOWN_JEWELS", knownJewels);
+
+        hiddenObjetecsMO = createMemoryObject("HIDDEN_THINGS");
+        hiddenObjetecsMO.setI(Collections.synchronizedList(new ArrayList<Thing>()));
 
         // Create and Populate MindViewer
         MindView mv = new MindView("MindView");
@@ -118,19 +116,19 @@ public class AgentMind extends Mind {
 
         // Create Motivational Codelets
         try {
-            hungryMotivationalCodelet = new HungryMotivationalCodelet("HungryDrive", 0, 0.4, 0.7);
+            hungerMotivationalCodelet = new HungerMotivationalCodelet("HungerDrive", 0, 0.4, 0.7);
             avoidDangerMotivationalCodelet = new AvoidDangerMotivationalCodelet("AvoidDangerDrive", 0, 0.3, 0.8);
-            curiosityMotivationalCodelet = new CuriosityMotivationalCodelet("CuriosityDrive", 0, 0.2, 0.9);
+            ambitionMotivationalCodelet = new AmbitionMotivationalCodelet("AmbitionDrive", 0, 0.2, 0.9);
+            boredomMotivationalCodelet = new BoredomMotivationalCodelet("BoredomDrive", 0, 0.35, 0.8);
         } catch (CodeletActivationBoundsException e) {
             e.printStackTrace();
         }
         //=============================
 
-
-
         // Create Perception Codelets
         Codelet ad = new AppleDetector(env.c);
         ad.addInput(visionMO);
+        ad.addInput(hiddenObjetecsMO);
         ad.addOutput(knownApplesMO);
         insertCodelet(ad);
 
@@ -161,48 +159,69 @@ public class AgentMind extends Mind {
         //==================================
 
 
-        //Hungry Motivational Codelet
-        List<Memory> hungrySensorsMemory = new ArrayList<>();
-        hungrySensorsMemory.add(innerSenseMO);
-        hungrySensorsMemory.add(knownApplesMO);
+        //Boredom Motivational Codelet
+        List<Memory> boredomSensorsMemory = new ArrayList<>();
+        boredomSensorsMemory.add(innerSenseMO);
 
-        Memory inputHungrySensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
-        inputHungrySensorsMO.setI(hungrySensorsMemory);
+        Memory inputBoredomSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
+        inputBoredomSensorsMO.setI(boredomSensorsMemory);
 
-        hungryMotivationalCodelet.addInput(inputHungrySensorsMO);
+        boredomMotivationalCodelet.addInput(inputBoredomSensorsMO);
 
-        Memory inputHungryDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
-        inputHungryDrivesMO.setI(new HashMap<Memory, Double>());
+        Memory inputBoredomDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
+        inputBoredomDrivesMO.setI(new HashMap<Memory, Double>());
 
-        hungryMotivationalCodelet.addInput(inputHungryDrivesMO);
+        boredomMotivationalCodelet.addInput(inputBoredomDrivesMO);
+
+        Memory outputBoredomDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+
+        boredomMotivationalCodelet.addOutput(outputBoredomDriveMO);
+
+        insertCodelet(boredomMotivationalCodelet);
+        //=============================
+
+        //Hunger Motivational Codelet
+        List<Memory> hungerSensorsMemory = new ArrayList<>();
+        hungerSensorsMemory.add(innerSenseMO);
+        hungerSensorsMemory.add(knownApplesMO);
+
+        Memory inputHungerSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
+        inputHungerSensorsMO.setI(hungerSensorsMemory);
+
+        hungerMotivationalCodelet.addInput(inputHungerSensorsMO);
+
+        Memory inputHungerDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
+        inputHungerDrivesMO.setI(new HashMap<Memory, Double>());
+
+        hungerMotivationalCodelet.addInput(inputHungerDrivesMO);
 
         Memory outputHungryDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
-        hungryMotivationalCodelet.addOutput(outputHungryDriveMO);
+        hungerMotivationalCodelet.addOutput(outputHungryDriveMO);
 
-        insertCodelet(hungryMotivationalCodelet);
+        insertCodelet(hungerMotivationalCodelet);
         //=============================
 
 
         //Curiosity Motivational Codelet
-        List<Memory> curiositySensorsMemory = new ArrayList<>();
-        curiositySensorsMemory.add(innerSenseMO);
-        curiositySensorsMemory.add(knownJewelsMO);
+        List<Memory> ambitionSensorsMemory = new ArrayList<>();
+        ambitionSensorsMemory.add(innerSenseMO);
+        ambitionSensorsMemory.add(knownJewelsMO);
 
-        Memory inputCuriositySensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
-        inputCuriositySensorsMO.setI(curiositySensorsMemory);
-        curiosityMotivationalCodelet.addInput(inputCuriositySensorsMO);
+        Memory inputAmbitionSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
+        inputAmbitionSensorsMO.setI(ambitionSensorsMemory);
+        ambitionMotivationalCodelet.addInput(inputAmbitionSensorsMO);
 
-        Memory inputCuriosityDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
-        inputCuriosityDrivesMO.setI(new HashMap<Memory, Double>());
+        Memory inputAmbitionDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
+        inputAmbitionDrivesMO.setI(new HashMap<Memory, Double>());
 
-        curiosityMotivationalCodelet.addInput(inputCuriosityDrivesMO);
+        ambitionMotivationalCodelet.addInput(inputAmbitionDrivesMO);
 
-        Memory outputCuriosityDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        Memory outputAmbitionDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
-        curiosityMotivationalCodelet.addOutput(outputCuriosityDriveMO);
+        ambitionMotivationalCodelet.addOutput(outputAmbitionDriveMO);
 
-        insertCodelet(curiosityMotivationalCodelet);
+        insertCodelet(ambitionMotivationalCodelet);
         //=================================
 
         //Avoid Danger Motivational Codelet
@@ -226,25 +245,10 @@ public class AgentMind extends Mind {
         //=================================
 
 
-        // Create Behavior Codelets
-        Codelet goToClosestApple = new GoToApple(creatureBasicSpeed);
-        MemoryObject legsGoAppleMO = createMemoryObject("LEGS_GO_APPLE");
-        goToClosestApple.addInput(outputHungryDriveMO);
-        goToClosestApple.addInput(knownApplesMO);
-        goToClosestApple.addOutput(legsGoAppleMO);
-        insertCodelet(goToClosestApple);
-
-        Codelet eatApple = new EatClosestApple(reachDistance);
-        MemoryObject handsEatAppleMO = createMemoryObject("HANDS_EAT_APPLE");
-        eatApple.addInput(outputHungryDriveMO);
-        eatApple.addInput(closestAppleMO);
-        eatApple.addInput(innerSenseMO);
-        eatApple.addOutput(handsEatAppleMO);
-        insertCodelet(eatApple);
-
+        // Create Motivational Behavior Codelets
         Codelet goToClosestJewel = new GoToJewel(creatureBasicSpeed);
         MemoryObject legsGoJewelMO = createMemoryObject("LEGS_GO_JEWEL");
-        goToClosestJewel.addInput(outputCuriosityDriveMO);
+        goToClosestJewel.addInput(outputAmbitionDriveMO);
         goToClosestJewel.addInput(knownJewelsMO);
         goToClosestJewel.addInput(innerSenseMO);
         goToClosestJewel.addOutput(legsGoJewelMO);
@@ -252,7 +256,7 @@ public class AgentMind extends Mind {
 
         Codelet getJewel = new GetClosestJewel(reachDistance);
         MemoryObject handsGetJewelMO = createMemoryObject("HANDS_GET_JEWEL");
-        getJewel.addInput(outputCuriosityDriveMO);
+        getJewel.addInput(outputAmbitionDriveMO);
         getJewel.addInput(closestJewelMO);
         getJewel.addInput(innerSenseMO);
         getJewel.addOutput(handsGetJewelMO);
@@ -262,17 +266,39 @@ public class AgentMind extends Mind {
         Codelet avoidColisionObstacle = new AvoidColisionObstacle();
         MemoryObject legsAvoidColisionMO = createMemoryObject("LEGS_AVOID_DANGER");
         MemoryObject handsAvoidColisionMO = createMemoryObject("HANDS_AVOID_DANGER");
+
         avoidColisionObstacle.addInput(knownJewelsMO);
-        //avoidColisionObstacle.addInput(legsGoJewelMO);
-        //avoidColisionObstacle.addInput(legsGoAppleMO);
-        //avoidColisionObstacle.addInput(handsEatAppleMO);
-        //avoidColisionObstacle.addInput(handsGetJewelMO);
         avoidColisionObstacle.addInput(outputAvoidDangerDriveMO);
         avoidColisionObstacle.addInput(closestObstacleMO);
         avoidColisionObstacle.addInput(innerSenseMO);
         avoidColisionObstacle.addOutput(legsAvoidColisionMO);
         avoidColisionObstacle.addOutput(handsAvoidColisionMO);
+        avoidColisionObstacle.addOutput(hiddenObjetecsMO);
         insertCodelet(avoidColisionObstacle);
+
+        Codelet eatApple = new EatClosestApple(reachDistance);
+        MemoryObject handsEatAppleMO = createMemoryObject("HANDS_EAT_APPLE");
+        eatApple.addInput(outputHungryDriveMO);
+        eatApple.addInput(closestAppleMO);
+        eatApple.addInput(innerSenseMO);
+        eatApple.addInput(hiddenObjetecsMO);
+        eatApple.addOutput(handsEatAppleMO);
+        insertCodelet(eatApple);
+
+        Codelet goToClosestApple = new GoToApple(creatureBasicSpeed, env.c);
+        MemoryObject legsGoAppleMO = createMemoryObject("LEGS_GO_APPLE");
+        goToClosestApple.addInput(outputHungryDriveMO);
+        goToClosestApple.addInput(knownApplesMO);
+        goToClosestApple.addOutput(legsGoAppleMO);
+        insertCodelet(goToClosestApple);
+
+        Codelet randomMove = new RandomMove();
+        MemoryObject legsRandomMoveMO = createMemoryObject("LEGS_RANDOM_MOVE");
+        randomMove.addInput(outputBoredomDriveMO);
+        randomMove.addOutput(legsRandomMoveMO);
+        insertCodelet(randomMove);
+        //=======================================
+
 
         // Create Actuator Codelets
         Codelet legs = new LegsActionCodelet(env.c);
@@ -280,7 +306,9 @@ public class AgentMind extends Mind {
         legsBehaviorMC.add(legsGoAppleMO);
         legsBehaviorMC.add(legsGoJewelMO);
         legsBehaviorMC.add(legsAvoidColisionMO);
+        legsBehaviorMC.add(legsRandomMoveMO);
         legs.addInput(legsBehaviorMC);
+
         insertCodelet(legs);
 
         Codelet hands = new HandsActionCodelet(env.c);
@@ -289,20 +317,18 @@ public class AgentMind extends Mind {
         handsBehaviorMC.add(handsGetJewelMO);
         handsBehaviorMC.add(handsAvoidColisionMO);
         hands.addInput(handsBehaviorMC);
+        hands.addInput(hiddenObjetecsMO);
         insertCodelet(hands);
-
-        List<Codelet> codelets = new ArrayList<>();
-        codelets.add(hungryMotivationalCodelet);
-        codelets.add(avoidDangerMotivationalCodelet);
-        codelets.add(curiosityMotivationalCodelet);
+        //============================
 
         List<Codelet> mtCodelets = new ArrayList<>();
         mtCodelets.add(avoidDangerMotivationalCodelet);
-        mtCodelets.add(curiosityMotivationalCodelet);
-        mtCodelets.add(hungryMotivationalCodelet);
+        mtCodelets.add(ambitionMotivationalCodelet);
+        mtCodelets.add(hungerMotivationalCodelet);
+        mtCodelets.add(boredomMotivationalCodelet);
 
         MotivationalSubsystemViewer motivationalSubsystemViewer =  new MotivationalSubsystemViewer(mtCodelets,
-                new ArrayList<Codelet>(), new ArrayList<Codelet>(),new ArrayList<Codelet>(), new ArrayList<Codelet>(), 500);
+                new ArrayList<Codelet>(), new ArrayList<Codelet>(),new ArrayList<Codelet>(), new ArrayList<Codelet>(), 50);
 
         motivationalSubsystemViewer.setVisible(true);
 

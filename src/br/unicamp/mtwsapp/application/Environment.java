@@ -14,8 +14,8 @@ public class Environment {
 
     public String host = "localhost";
     public int port = 4011;
-    public int width = 2000;
-    public int height = 2000;
+    public int width = 800;
+    public int height = 600;
     public Creature c = null;
 
     public Environment() {
@@ -26,9 +26,9 @@ public class Environment {
 
             Random rand = new Random();
 
-            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
-            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
-            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
+            World.createFood(rand.nextInt(2), rand.nextInt(width), rand.nextInt(height));
+            //World.createFood(0, rand.nextInt(width), rand.nextInt(height));
+            //World.createFood(0, rand.nextInt(width), rand.nextInt(height));
 
             World.createJewel(0, rand.nextInt(width), rand.nextInt(height));
             World.createJewel(1, rand.nextInt(width), rand.nextInt(height));

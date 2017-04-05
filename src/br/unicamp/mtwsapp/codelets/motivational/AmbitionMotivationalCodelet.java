@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * Created by du on 22/03/17.
  */
-public class CuriosityMotivationalCodelet extends MotivationalCodelet {
-    public CuriosityMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
+public class AmbitionMotivationalCodelet extends MotivationalCodelet {
+    public AmbitionMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
         super(name, level, priority, urgencyThreshold);
     }
 
@@ -41,19 +41,26 @@ public class CuriosityMotivationalCodelet extends MotivationalCodelet {
             }
         }
 
-        double curiosityDeficit = 0;
+        double ambitionDeficit = 0.0d;
 
         synchronized (cisMO) {
             CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
             if (cis.getLeafletList() != null) {
-                curiosityDeficit = 1 - getCollectedNumberLeaflet(cis.getLeafletList())/getFullNumberLeaflet(cis.getLeafletList());
+
+                double collectedNumberLeaflet = getCollectedNumberLeaflet(cis.getLeafletList());
+                double fullNumberLeaflet = getFullNumberLeaflet(cis.getLeafletList());
+
+                ambitionDeficit = (collectedNumberLeaflet/fullNumberLeaflet);
             }
         }
 
-        double activation = 0.9 * Math.max(curiosityDeficit, curiosityDeficit * (1 + jewelsStimulus));
+        double activation = 0.9 * Math.max(ambitionDeficit, ambitionDeficit * (1 + jewelsStimulus));
 
         if (activation > 1)
             activation = 1;
+
+        if(activation == 0)
+            activation = 0.05;
 
         return activation;
     }
@@ -63,7 +70,7 @@ public class CuriosityMotivationalCodelet extends MotivationalCodelet {
         return 0;
     }
 
-    public int getFullNumberLeaflet(List<Leaflet> leaflets) {
+    public double getFullNumberLeaflet(List<Leaflet> leaflets) {
 
         //HashMap<String, Integer> mapOfJewels = new HashMap<>();
 
@@ -85,13 +92,14 @@ public class CuriosityMotivationalCodelet extends MotivationalCodelet {
         mapOfJewels.put(Constants.colorMAGENTA, 0);
         mapOfJewels.put(Constants.colorBLUE, 0);*/
 
-        int totalJewels = 0;
+        double totalJewels = 0;
 
         for (Leaflet leaflet : leaflets) {
 
             for (String color : colors) {
                 if (leaflet.getTotalNumberOfType(color) != -1)
                     totalJewels += leaflet.getTotalNumberOfType(color);
+
 
                     //mapOfJewels.put(color, mapOfJewels.get(color) + leaflet.getTotalNumberOfType(color));
             }
@@ -101,7 +109,7 @@ public class CuriosityMotivationalCodelet extends MotivationalCodelet {
         return totalJewels;
     }
 
-    public int getCollectedNumberLeaflet(List<Leaflet> leaflets) {
+    public double getCollectedNumberLeaflet(List<Leaflet> leaflets) {
 
         ArrayList<String> colors = new ArrayList<String>();
         colors.add(Constants.colorRED);
@@ -112,7 +120,7 @@ public class CuriosityMotivationalCodelet extends MotivationalCodelet {
         colors.add(Constants.colorMAGENTA);
         colors.add(Constants.colorBLUE);
 
-        int totalCollectedJewels = 0;
+        double totalCollectedJewels = 0;
 
         for (Leaflet leaflet : leaflets) {
 
