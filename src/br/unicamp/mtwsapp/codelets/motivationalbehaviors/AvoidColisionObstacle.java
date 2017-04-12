@@ -20,7 +20,6 @@ import ws3dproxy.model.Thing;
 import java.util.List;
 
 /**
- *
  * @author Du
  */
 public class AvoidColisionObstacle extends Codelet {
@@ -45,22 +44,22 @@ public class AvoidColisionObstacle extends Codelet {
         if (drivesMO == null)
             drivesMO = (MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
-        if(closestObstacle == null)
+        if (closestObstacle == null)
             closestObstacleMO = (MemoryObject) this.getInput("CLOSEST_OBSTACLE");
 
-        if(innerSenseMO == null)
+        if (innerSenseMO == null)
             innerSenseMO = (MemoryObject) this.getInput("INNER");
 
-        if(legsMO == null)
+        if (legsMO == null)
             legsMO = (MemoryObject) this.getOutput("LEGS_AVOID_DANGER");
 
-        if(handsMO == null)
+        if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_AVOID_DANGER");
 
-        if(knownJewelsMO == null)
+        if (knownJewelsMO == null)
             knownJewelsMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
 
-        if(hiddenObjectsMO == null)
+        if (hiddenObjectsMO == null)
             hiddenObjectsMO = (MemoryObject) this.getOutput("HIDDEN_THINGS");
 
 
@@ -93,7 +92,7 @@ public class AvoidColisionObstacle extends Codelet {
         //If closer than reachDistance, eat the apple
         if (closestObstacle != null) {
             JSONObject message = new JSONObject();
-            if(closestObstacle.getName().contains("Brick")) {
+            if (closestObstacle.getName().contains("Brick")) {
                 try {
 
                     message.put("OBJECT", obstacleName);
@@ -107,12 +106,11 @@ public class AvoidColisionObstacle extends Codelet {
 
                     e.printStackTrace();
                 }
-            }
-            else{
+            } else {
 
-                if(closestObstacle.getName().contains("Jewel")){
+                if (closestObstacle.getName().contains("Jewel")) {
                     List<Thing> jewels = (List<Thing>) knownJewelsMO.getI();
-                    if(!jewels.contains(closestObstacle)){
+                    if (!jewels.contains(closestObstacle)) {
                         try {
                             message.put("OBJECT", closestObstacle.getName());
                             message.put("ACTION", "BURY");
@@ -123,8 +121,7 @@ public class AvoidColisionObstacle extends Codelet {
                         handsMO.setI(message.toString());
                         legsMO.setEvaluation(getActivation());
                         legsMO.setI("");
-                    }
-                    else{
+                    } else {
                         try {
                             message.put("OBJECT", closestObstacle.getName());
                             message.put("ACTION", "PICKUP");
@@ -136,8 +133,9 @@ public class AvoidColisionObstacle extends Codelet {
                         legsMO.setEvaluation(getActivation());
                         legsMO.setI("");
                     }
-                }
-                else{
+                } else {
+
+
                     try {
                         message.put("OBJECT", closestObstacle.getName());
                         message.put("ACTION", "BURY");
@@ -146,27 +144,28 @@ public class AvoidColisionObstacle extends Codelet {
                     }
 
 
-                    closestObstacle.hidden = true;
+                    /*closestObstacle.hidden = true;
 
                     List<Thing> things = (List<Thing>) hiddenObjectsMO.getI();
 
-                    if(things.size() == 0 )
-                    {
+
+                    if (things.size() == 0) {
                         things.add(closestObstacle);
-                    }
-                    else {
+                    } else {
                         for (int i = 0; i < things.size(); i++) {
                             if (!things.get(i).getName().equals(closestObstacle.getName())) {
                                 things.add(closestObstacle);
                             }
                         }
-                    }
+                    }*/
+
 
                     handsMO.setEvaluation(getActivation());
                     handsMO.setI(message.toString());
 
                     legsMO.setEvaluation(getActivation());
                     legsMO.setI("");
+
                 }
             }
         } else {

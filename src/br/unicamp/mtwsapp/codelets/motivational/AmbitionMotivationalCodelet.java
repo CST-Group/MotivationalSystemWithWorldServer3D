@@ -16,6 +16,9 @@ import java.util.List;
  * Created by du on 22/03/17.
  */
 public class AmbitionMotivationalCodelet extends MotivationalCodelet {
+
+    private double agentScore = 0;
+
     public AmbitionMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
         super(name, level, priority, urgencyThreshold);
     }
@@ -45,21 +48,26 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
         synchronized (cisMO) {
             CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
+
             if (cis.getLeafletList() != null) {
 
                 double collectedNumberLeaflet = getCollectedNumberLeaflet(cis.getLeafletList());
                 double fullNumberLeaflet = getFullNumberLeaflet(cis.getLeafletList());
 
-                ambitionDeficit = (collectedNumberLeaflet/fullNumberLeaflet);
+                ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
             }
         }
+        //System.out.println("Score:" + ((CreatureInnerSense) cisMO.getI()).getScore() + " Ambition:" + ambitionDeficit);
 
-        double activation = 0.9 * Math.max(ambitionDeficit, ambitionDeficit * (1 + jewelsStimulus));
+        ((CreatureInnerSense) cisMO.getI()).setLeafletCompleteRate(ambitionDeficit * 100);
+        ((CreatureInnerSense) cisMO.getI()).setScore(agentScore);
+
+        double activation = Math.max(ambitionDeficit, ambitionDeficit * (1 + jewelsStimulus));
 
         if (activation > 1)
             activation = 1;
 
-        if(activation == 0)
+        if (activation == 0)
             activation = 0.05;
 
         return activation;
@@ -72,8 +80,6 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
     public double getFullNumberLeaflet(List<Leaflet> leaflets) {
 
-        //HashMap<String, Integer> mapOfJewels = new HashMap<>();
-
         ArrayList<String> colors = new ArrayList<String>();
         colors.add(Constants.colorRED);
         colors.add(Constants.colorYELLOW);
@@ -83,28 +89,29 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
         colors.add(Constants.colorMAGENTA);
         colors.add(Constants.colorBLUE);
 
-
-        /*mapOfJewels.put(Constants.colorRED, 0);
-        mapOfJewels.put(Constants.colorYELLOW, 0);
-        mapOfJewels.put(Constants.colorGREEN, 0);
-        mapOfJewels.put(Constants.colorWHITE, 0);
-        mapOfJewels.put(Constants.colorORANGE, 0);
-        mapOfJewels.put(Constants.colorMAGENTA, 0);
-        mapOfJewels.put(Constants.colorBLUE, 0);*/
-
         double totalJewels = 0;
+
+        double totalScore = 0;
 
         for (Leaflet leaflet : leaflets) {
 
+            int countLeaflet = 0;
+
             for (String color : colors) {
-                if (leaflet.getTotalNumberOfType(color) != -1)
+                if (leaflet.getTotalNumberOfType(color) != -1) {
                     totalJewels += leaflet.getTotalNumberOfType(color);
 
-
-                    //mapOfJewels.put(color, mapOfJewels.get(color) + leaflet.getTotalNumberOfType(color));
+                    if(leaflet.getMissingNumberOfType(color) > 0)
+                        countLeaflet++;
+                }
             }
 
+            if(countLeaflet == 0)
+                totalScore += leaflet.getSituation();
+
         }
+
+        this.agentScore = totalScore;
 
         return totalJewels;
     }

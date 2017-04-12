@@ -83,18 +83,7 @@ public class LegsActionCodelet extends Codelet {
                                 }
                             }
 
-                        } /*else if (action.equals("GOTO_HIDDEN_FOOD")) {
-                        if (!comm.equals(previousLegsAction)) {
-                            rotation = rotation == 0.01 ? -0.01 : 0.01;
-                            double speed = command.getDouble("SPEED");
-                            double targetx = command.getDouble("X");
-                            double targety = command.getDouble("Y");
-
-                            log.info("Sending GOTO_HIDDEN_FOOD command to agent: [" + targetx + "," + targety + "]");
-                            c.moveto(speed, targetx, targety);
-                        }
-
-                    }*/ else if (action.equals("RANDOM")) {
+                        }  else if (action.equals("RANDOM")) {
                             if (!comm.equals(previousLegsAction)) {
                                 rotation = rotation == 0.01 ? -0.01 : 0.01;
                                 double speed = command.getDouble("SPEED");
@@ -124,7 +113,7 @@ public class LegsActionCodelet extends Codelet {
                                 c.move(-3, -3, c.getPitch());
 
                                 try {
-                                    Thread.sleep(200);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -132,7 +121,7 @@ public class LegsActionCodelet extends Codelet {
                                 c.move(3, 3, angle);
 
                                 try {
-                                    Thread.sleep(200);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }

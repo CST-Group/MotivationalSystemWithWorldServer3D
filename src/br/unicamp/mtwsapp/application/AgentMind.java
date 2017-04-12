@@ -88,20 +88,7 @@ public class AgentMind extends Mind {
         hiddenObjetecsMO = createMemoryObject("HIDDEN_THINGS");
         hiddenObjetecsMO.setI(Collections.synchronizedList(new ArrayList<Thing>()));
 
-        // Create and Populate MindViewer
-        MindView mv = new MindView("MindView");
-        mv.addMO(knownApplesMO);
-        mv.addMO(visionMO);
-        mv.addMO(closestAppleMO);
-        mv.addMO(innerSenseMO);
-        mv.addMO(handsMO);
-        mv.addMO(legsMO);
-        mv.addMO(closestJewelMO);
-        mv.addMO(knownJewelsMO);
-        mv.addMO(closestObstacleMO);
 
-        mv.StartTimer();
-        mv.setVisible(true);
 
 
         // Create Sensor Codelets
@@ -173,7 +160,7 @@ public class AgentMind extends Mind {
 
         boredomMotivationalCodelet.addInput(inputBoredomDrivesMO);
 
-        Memory outputBoredomDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        MemoryObject outputBoredomDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
         boredomMotivationalCodelet.addOutput(outputBoredomDriveMO);
 
@@ -195,7 +182,7 @@ public class AgentMind extends Mind {
 
         hungerMotivationalCodelet.addInput(inputHungerDrivesMO);
 
-        Memory outputHungryDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        MemoryObject outputHungryDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
         hungerMotivationalCodelet.addOutput(outputHungryDriveMO);
 
@@ -217,7 +204,7 @@ public class AgentMind extends Mind {
 
         ambitionMotivationalCodelet.addInput(inputAmbitionDrivesMO);
 
-        Memory outputAmbitionDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        MemoryObject outputAmbitionDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
         ambitionMotivationalCodelet.addOutput(outputAmbitionDriveMO);
 
@@ -226,6 +213,7 @@ public class AgentMind extends Mind {
 
         //Avoid Danger Motivational Codelet
         List<Memory> avoidDangerSensorsMemory = new ArrayList<>();
+        avoidDangerSensorsMemory.add(visionMO);
         avoidDangerSensorsMemory.add(closestObstacleMO);
 
         Memory inputAvoidDangerSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
@@ -237,7 +225,7 @@ public class AgentMind extends Mind {
 
         avoidDangerMotivationalCodelet.addInput(inputAvoidDangerDrivesMO);
 
-        Memory outputAvoidDangerDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        MemoryObject outputAvoidDangerDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
         avoidDangerMotivationalCodelet.addOutput(outputAvoidDangerDriveMO);
 
@@ -318,9 +306,12 @@ public class AgentMind extends Mind {
         handsBehaviorMC.add(handsAvoidColisionMO);
         hands.addInput(handsBehaviorMC);
         hands.addInput(hiddenObjetecsMO);
+        hands.addInput(visionMO);
+
         insertCodelet(hands);
         //============================
 
+        //Create and Populate MotivationalSubsystemViewer
         List<Codelet> mtCodelets = new ArrayList<>();
         mtCodelets.add(avoidDangerMotivationalCodelet);
         mtCodelets.add(ambitionMotivationalCodelet);
@@ -331,6 +322,32 @@ public class AgentMind extends Mind {
                 new ArrayList<Codelet>(), new ArrayList<Codelet>(),new ArrayList<Codelet>(), new ArrayList<Codelet>(), 50);
 
         motivationalSubsystemViewer.setVisible(true);
+        //================================================
+
+        // Create and Populate MindViewer
+        MindView mv = new MindView("MindView");
+        mv.addMO(knownApplesMO);
+        mv.addMO(visionMO);
+        mv.addMO(closestAppleMO);
+        mv.addMO(innerSenseMO);
+        mv.addMO(handsMO);
+        mv.addMO(legsMO);
+        mv.addMO(closestJewelMO);
+        mv.addMO(knownJewelsMO);
+        mv.addMO(closestObstacleMO);
+        mv.addMO(outputAmbitionDriveMO);
+        mv.addMO(outputAvoidDangerDriveMO);
+        mv.addMO(outputBoredomDriveMO);
+        mv.addMO(outputHungryDriveMO);
+
+        mv.setCreatureInnerSense(cis);
+        mv.setCreature(env.c);
+        mv.setMind(this);
+
+        mv.StartTimer();
+        mv.setVisible(true);
+        //=================================
+
 
         start();
     }

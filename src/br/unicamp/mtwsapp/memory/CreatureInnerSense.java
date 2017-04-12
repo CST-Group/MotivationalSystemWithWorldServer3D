@@ -16,12 +16,16 @@ public class CreatureInnerSense {
     private double fuel;
     private Polygon fov;
     private List<Leaflet> leafletList;
+    private double score;
+    private double leafletCompleteRate;
     
     public String toString() {
         if (getPosition() != null)
-            return("Position: ["+(int) getPosition().getX()+","+(int) getPosition().getY()+"] Pitch: ["+ getPitch() +"] Fuel: ["+ getFuel()+"]");
+            return("Position: ["+(int) getPosition().getX()+","+(int) getPosition().getY()+"] Pitch: ["+ getPitch() +"] Fuel: ["+ getFuel()+"] Leaflet Complete Rate: ["+ getLeafletCompleteRate() +"] Score: ["+getScore()+"]");
         else 
             return("Position: [null,null] "+" Pitch: ["+ getPitch() +"] Fuel: ["+ getFuel()+"]");
+
+
     }
 
     public WorldPoint getPosition() {
@@ -62,6 +66,22 @@ public class CreatureInnerSense {
 
     public void setLeafletList(List<Leaflet> leafletList) {
         this.leafletList = leafletList;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public double getLeafletCompleteRate() {
+        return leafletCompleteRate;
+    }
+
+    public void setLeafletCompleteRate(double leafletCompleteRate) {
+        this.leafletCompleteRate = leafletCompleteRate;
     }
 }
 

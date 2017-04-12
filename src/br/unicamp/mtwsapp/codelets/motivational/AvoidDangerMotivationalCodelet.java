@@ -4,8 +4,10 @@ import br.unicamp.cst.core.entities.Memory;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
+import ws3dproxy.model.Thing;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by du on 22/03/17.
@@ -18,20 +20,34 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
     @Override
     public double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
-        double activation = 0;
+        double closestActivation = 0;
+        double obstacleStimulus = 0;
 
-        Memory closestObstacle = sensorsMemory.get(0);
+        Memory closestObstacle = sensorsMemory.get(1);
+
+        Memory visionMO = sensorsMemory.get(0);
 
         synchronized (closestObstacle) {
             if (closestObstacle.getI() != null) {
                 if (closestObstacle.getI() == "")
-                    activation = 0;
+                    closestActivation = 0;
                 else
-                    activation = 1;
+                    closestActivation = 0.8;
             }
         }
 
-        return activation;
+        synchronized (visionMO){
+            if(visionMO.getI() != null){
+                List<Thing> vision = (List<Thing>) visionMO.getI();
+                if(vision.stream().filter(thing -> thing.getName().contains("Brick")).collect(Collectors.toList()).size() > 0){
+                    obstacleStimulus = 0.05;
+                }
+            }
+        }
+
+        double finalActivation = Math.max(obstacleStimulus, closestActivation*(1+obstacleStimulus));
+
+        return finalActivation;
     }
 
     @Override

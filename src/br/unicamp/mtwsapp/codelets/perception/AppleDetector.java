@@ -3,12 +3,10 @@ package br.unicamp.mtwsapp.codelets.perception;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
@@ -38,7 +36,7 @@ public class AppleDetector extends Codelet {
             this.knownApplesMO = (MemoryObject) this.getOutput("KNOWN_APPLES");
 
         if (hiddenObjectsMO == null)
-            hiddenObjectsMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
+            this.hiddenObjectsMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
     }
 
     @Override
@@ -76,22 +74,32 @@ public class AppleDetector extends Codelet {
                                     break;
                                 }
                             }
-                            if (found == false && t.getName().contains("PFood") && !t.getName().contains("NPFood")) {
+                            if (found == false && t.getName().contains("Food")) {
                                 known.add(t);
                             }
                         }
 
                     }
-
-
                 } else {
                     known.removeAll(known);
                 }
-
             }
 
             List<Thing> hiddenThings = (List<Thing>) hiddenObjectsMO.getI();
-            known.addAll(Collections.synchronizedList(hiddenThings.stream().filter( t -> t.hidden).collect(Collectors.toList())));
+
+            for (Thing thing: hiddenThings) {
+                if(thing.hidden && !known.stream().anyMatch(x->x.getName().equals(thing.getName())))
+                    known.add(thing);
+            }
+
+            /*hiddenThings.stream().forEach(thing -> {
+                if (known.stream().filter(k-> k.getName().equals(thing.getName()) && k.hidden).collect(Collectors.toList()).size() == 0)
+                    known.add(thing);
+            });*/
+
+
+            //if(!known.containsAll(Collections.synchronizedList(hiddenThings.stream().filter( t -> t.hidden).collect(Collectors.toList()))))
+            //    known.addAll(Collections.synchronizedList(hiddenThings.stream().filter( t -> t.hidden).collect(Collectors.toList())));
         }
 
     }// end proc

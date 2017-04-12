@@ -18,7 +18,7 @@ and distribute the ZIP file.
 
 Notes:
 
-* If two JAR files on the project classpath have the same name, only the first
+* If two JAR files on the project classpath have the same variableName, only the first
 JAR file is copied to the lib folder.
 * Only JAR files are copied to the lib folder.
 If the classpath contains other types of files or folders, these files (folders)
@@ -28,5 +28,5 @@ specified in the manifest,the content of the Class-Path element has to be on
 the projects runtime path.
 * To set a main class in a standard Java project, right-click the project node
 in the Projects window and choose Properties. Then click Run and enter the
-class name in the Main Class field. Alternatively, you can manually type the
-class name in the manifest Main-Class element.
+class variableName in the Main Class field. Alternatively, you can manually type the
+class variableName in the manifest Main-Class element.

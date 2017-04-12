@@ -11,6 +11,7 @@ import br.unicamp.cst.core.entities.Codelet;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import ws3dproxy.CommandExecException;
 import ws3dproxy.model.Creature;
@@ -24,6 +25,7 @@ public class HandsActionCodelet extends Codelet {
 
     private MemoryContainer behaviorsMC;
     private MemoryObject hiddenApplesMO;
+    private MemoryObject visionMO;
 
     private String previousHandsAction = "";
     private Creature c;
@@ -36,11 +38,14 @@ public class HandsActionCodelet extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if(behaviorsMC == null)
+        if (behaviorsMC == null)
             behaviorsMC = (MemoryContainer) this.getInput("BEHAVIORS_MC");
 
         if (hiddenApplesMO == null)
             hiddenApplesMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
+
+        if(visionMO == null)
+            visionMO = (MemoryObject) this.getInput("VISION");
 
 
     }
@@ -48,7 +53,7 @@ public class HandsActionCodelet extends Codelet {
     public void proc() {
         synchronized (behaviorsMC) {
 
-            if(behaviorsMC.getI() != null) {
+            if (behaviorsMC.getI() != null) {
                 String command = (String) behaviorsMC.getI();
 
                 if (!command.equals("") && (!command.equals(previousHandsAction))) {
@@ -79,13 +84,34 @@ public class HandsActionCodelet extends Codelet {
                             if (action.equals("BURY")) {
                                 try {
                                     c.hideIt(objectName);
+
+                                    List<Thing> vision = (List<Thing>) visionMO.getI();
+
+                                    Thing closestObstacle = vision.stream().filter(v->v.getName().equals(objectName)).collect(Collectors.toList()).get(0);
+
+                                    if(closestObstacle.getName().contains("Food")) {
+                                        closestObstacle.hidden = true;
+
+                                        List<Thing> things = (List<Thing>) hiddenApplesMO.getI();
+
+                                        if (things.size() == 0) {
+                                            things.add(closestObstacle);
+                                        } else {
+                                            for (int i = 0; i < things.size(); i++) {
+                                                if (!things.get(i).getName().equals(closestObstacle.getName())) {
+                                                    things.add(closestObstacle);
+                                                }
+                                            }
+                                        }
+                                    }
+
                                 } catch (Exception e) {
 
                                 }
 
                                 log.info("Sending BURY command to agent:****** " + objectName + "**********");
                             }
-                            if(action.equals("UNEARTH")){
+                            if (action.equals("UNEARTH")) {
 
                                 try {
                                     c.unhideIt(objectName);
@@ -96,12 +122,15 @@ public class HandsActionCodelet extends Codelet {
 
                                 List<Thing> things = (List<Thing>) hiddenApplesMO.getI();
 
+
                                 for (int i = 0; i < things.size(); i++) {
                                     if (things.get(i).getName().equals(objectName)) {
                                         things.get(i).hidden = false;
+                                        //things.remove(i);
                                         break;
                                     }
                                 }
+
 
                                 log.info("Sending UNEARTH command to agent:****** " + objectName + "**********");
                             }

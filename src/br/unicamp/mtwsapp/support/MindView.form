@@ -2,22 +2,22 @@
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
-    <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property variableName="defaultCloseOperation" type="int" value="3"/>
   </Properties>
   <SyntheticProperties>
-    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
-    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+    <SyntheticProperty variableName="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty variableName="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
   <AuxValues>
-    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
-    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
-    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
-    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
-    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
-    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
-    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
-    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
-    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+    <AuxValue variableName="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue variableName="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue variableName="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue variableName="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue variableName="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue variableName="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue variableName="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue variableName="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue variableName="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
   </AuxValues>
 
   <Layout>
@@ -33,17 +33,17 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+    <Container class="javax.swing.JScrollPane" variableName="jScrollPane1">
       <AuxValues>
-        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+        <AuxValue variableName="autoScrollPane" type="java.lang.Boolean" value="true"/>
       </AuxValues>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.br.unicamp.mtwsapp.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextArea" name="text">
+        <Component class="javax.swing.JTextArea" variableName="text">
           <Properties>
-            <Property name="columns" type="int" value="20"/>
-            <Property name="rows" type="int" value="5"/>
+            <Property variableName="columns" type="int" value="20"/>
+            <Property variableName="rows" type="int" value="5"/>
           </Properties>
         </Component>
       </SubComponents>
