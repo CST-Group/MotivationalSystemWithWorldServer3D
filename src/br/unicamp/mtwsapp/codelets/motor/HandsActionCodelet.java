@@ -125,8 +125,8 @@ public class HandsActionCodelet extends Codelet {
 
                                 for (int i = 0; i < things.size(); i++) {
                                     if (things.get(i).getName().equals(objectName)) {
-                                        things.get(i).hidden = false;
-                                        //things.remove(i);
+                                        //things.get(i).hidden = false;
+                                        things.remove(i);
                                         break;
                                     }
                                 }

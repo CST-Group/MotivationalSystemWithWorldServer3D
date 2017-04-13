@@ -87,8 +87,9 @@ public class AppleDetector extends Codelet {
 
             List<Thing> hiddenThings = (List<Thing>) hiddenObjectsMO.getI();
 
+
             for (Thing thing: hiddenThings) {
-                if(thing.hidden && !known.stream().anyMatch(x->x.getName().equals(thing.getName())))
+                if(!known.stream().anyMatch(x->x.getName().equals(thing.getName())))
                     known.add(thing);
             }
 

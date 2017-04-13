@@ -98,7 +98,7 @@ public class MindView extends javax.swing.JFrame {
     private CreatureInnerSense creatureInnerSense;
     private Date initDate;
 
-    private int defaultTime = 5;
+    private int defaultTime = 15;
 
     private File fileEnergySpent;
     private File fileCreatureScore;
@@ -226,7 +226,9 @@ public class MindView extends javax.swing.JFrame {
     private void createObjectsInWorld(){
         try {
             Random random = new Random();
-            World.createJewel(0, r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
             World.createFood(random.nextInt(2), r.nextInt(800), r.nextInt(600));
             World.createFood(random.nextInt(2), r.nextInt(800), r.nextInt(600));
         } catch (Exception e) {

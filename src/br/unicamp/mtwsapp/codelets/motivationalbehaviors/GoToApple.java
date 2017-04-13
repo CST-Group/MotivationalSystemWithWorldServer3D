@@ -107,34 +107,6 @@ public class GoToApple extends Codelet {
                             e.printStackTrace();
                         }
                     }
-                /*else if (!hiddenApples.isEmpty()) {
-                        Comparator<Thing> comparator = new Comparator<Thing>() {
-                            @Override
-                            public int compare(Thing thing1, Thing thing2) {
-                                int nearThing = creature.calculateDistanceTo(thing2) < creature.calculateDistanceTo(thing1) ? 1 : 0;
-                                return nearThing;
-                            }
-                        };
-
-                        Collections.sort(hiddenApples, comparator);
-                        Thing hiddenApple = hiddenApples.get(0);
-                        JSONObject message = new JSONObject();
-                        try {
-
-                            message.put("ACTION", "GOTO_HIDDEN_FOOD");
-                            message.put("X", hiddenApple.getX1());
-                            message.put("Y", hiddenApple.getY1());
-                            message.put("SPEED", creatureBasicSpeed);
-
-                            legsMO.setI(message.toString());
-                            legsMO.setEvaluation(getActivation());
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                       //hiddenApple.hidden = false;
-                    }*/
                 }
             }
         }

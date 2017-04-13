@@ -106,7 +106,7 @@ public class GenerateReport {
         xyPlot.getRangeAxis().setLabelFont(font3);
 
         NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
-        domain.setRange(0.00, 60);
+        domain.setRange(0.00, 900);
 
         xyPlot.setBackgroundPaint(Color.lightGray);
         xyPlot.setDomainGridlinePaint(Color.white);

@@ -24,7 +24,6 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
         double obstacleStimulus = 0;
 
         Memory closestObstacle = sensorsMemory.get(1);
-
         Memory visionMO = sensorsMemory.get(0);
 
         synchronized (closestObstacle) {
@@ -45,7 +44,10 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
             }
         }
 
-        double finalActivation = Math.max(obstacleStimulus, closestActivation*(1+obstacleStimulus));
+        double finalActivation = obstacleStimulus + closestActivation;
+
+        if(finalActivation > 1)
+            finalActivation = 1;
 
         return finalActivation;
     }

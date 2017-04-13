@@ -58,7 +58,7 @@ public class AgentMind extends Mind {
         MemoryObject closestObstacleMO;
         MemoryObject hiddenObjetecsMO;
         int reachDistance = 65;
-        int brickDistance = 40;
+        int brickDistance = 45;
 
         //Initialize Memory Objects
         legsMO = createMemoryObject("LEGS", "");
@@ -103,10 +103,10 @@ public class AgentMind extends Mind {
 
         // Create Motivational Codelets
         try {
-            hungerMotivationalCodelet = new HungerMotivationalCodelet("HungerDrive", 0, 0.4, 0.7);
-            avoidDangerMotivationalCodelet = new AvoidDangerMotivationalCodelet("AvoidDangerDrive", 0, 0.3, 0.8);
+            hungerMotivationalCodelet = new HungerMotivationalCodelet("HungerDrive", 0, 0.3, 0.8);
+            avoidDangerMotivationalCodelet = new AvoidDangerMotivationalCodelet("AvoidDangerDrive", 0, 0.45, 0.8);
             ambitionMotivationalCodelet = new AmbitionMotivationalCodelet("AmbitionDrive", 0, 0.2, 0.9);
-            boredomMotivationalCodelet = new BoredomMotivationalCodelet("BoredomDrive", 0, 0.35, 0.8);
+            boredomMotivationalCodelet = new BoredomMotivationalCodelet("BoredomDrive", 0, 0.4, 0.8);
         } catch (CodeletActivationBoundsException e) {
             e.printStackTrace();
         }
@@ -248,7 +248,6 @@ public class AgentMind extends Mind {
         getJewel.addInput(closestJewelMO);
         getJewel.addInput(innerSenseMO);
         getJewel.addOutput(handsGetJewelMO);
-        getJewel.addOutput(knownJewelsMO);
         insertCodelet(getJewel);
 
         Codelet avoidColisionObstacle = new AvoidColisionObstacle();
@@ -261,7 +260,6 @@ public class AgentMind extends Mind {
         avoidColisionObstacle.addInput(innerSenseMO);
         avoidColisionObstacle.addOutput(legsAvoidColisionMO);
         avoidColisionObstacle.addOutput(handsAvoidColisionMO);
-        avoidColisionObstacle.addOutput(hiddenObjetecsMO);
         insertCodelet(avoidColisionObstacle);
 
         Codelet eatApple = new EatClosestApple(reachDistance);

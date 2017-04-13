@@ -43,7 +43,7 @@ public class BoredomMotivationalCodelet extends MotivationalCodelet {
                     timeCheckPoint = new Date();
                 else{
                     double diff = (new Date()).getTime() - timeCheckPoint.getTime();
-                    activation = diff/60000 > 1 ? 1 : diff/60000;
+                    activation = diff/20000 > 1 ? 1 : diff/20000;
                 }
             }
             else{

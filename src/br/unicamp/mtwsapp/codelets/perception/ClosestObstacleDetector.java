@@ -49,7 +49,7 @@ public class ClosestObstacleDetector extends Codelet {
     public void proc() {
         Thing closest_obstacle = null;
         known = Collections.synchronizedList((List<Thing>) visionMO.getI());
-        closestObstacleMO.setI(closest_obstacle);
+        //closestObstacleMO.setI(closest_obstacle);
         
         synchronized (known) {
             if (!known.isEmpty()) {
@@ -60,10 +60,6 @@ public class ClosestObstacleDetector extends Codelet {
                     if(isNear(t, reachDistance) != null){
                         closest_obstacle = isNear(t, reachDistance);
                     }
-
-                    /*if (objectName.contains("Brick")) {
-                        closest_obstacle = isNear(t, reachDistance);
-                    }*/
                 }
 
                 if (closest_obstacle != null) {

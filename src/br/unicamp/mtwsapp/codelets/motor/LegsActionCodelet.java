@@ -105,7 +105,7 @@ public class LegsActionCodelet extends Codelet {
                             if (!comm.equals(previousLegsAction)) {
                                 rotation = rotation == 0.01 ? -0.01 : 0.01;
                                 Random rand = new Random();
-                                int random = rand.nextInt(3);
+                                int random = rand.nextInt(2);
                                 double angle = randomAngle(random);
 
                                 log.info("Sending AVOID command to agent: [" + angle + "]");
@@ -150,12 +150,10 @@ public class LegsActionCodelet extends Codelet {
 
 
     private double randomAngle(int random) {
-        if (random == 2) {
+        if (random == 1) {
             return (c.getPitch() + Math.toRadians(-90));
-        } else if (random == 1) {
+        } else  {
             return (c.getPitch() + Math.toRadians(90));
-        } else {
-            return (c.getPitch() + Math.toRadians(180));
         }
     }
 

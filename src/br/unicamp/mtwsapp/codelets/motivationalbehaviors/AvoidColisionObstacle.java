@@ -30,7 +30,6 @@ public class AvoidColisionObstacle extends Codelet {
     private MemoryObject legsMO;
     private MemoryObject handsMO;
     private MemoryObject knownJewelsMO;
-    private MemoryObject hiddenObjectsMO;
 
     Thing closestObstacle;
     CreatureInnerSense cis;
@@ -59,8 +58,6 @@ public class AvoidColisionObstacle extends Codelet {
         if (knownJewelsMO == null)
             knownJewelsMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
 
-        if (hiddenObjectsMO == null)
-            hiddenObjectsMO = (MemoryObject) this.getOutput("HIDDEN_THINGS");
 
 
     }
@@ -142,22 +139,6 @@ public class AvoidColisionObstacle extends Codelet {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-
-                    /*closestObstacle.hidden = true;
-
-                    List<Thing> things = (List<Thing>) hiddenObjectsMO.getI();
-
-
-                    if (things.size() == 0) {
-                        things.add(closestObstacle);
-                    } else {
-                        for (int i = 0; i < things.size(); i++) {
-                            if (!things.get(i).getName().equals(closestObstacle.getName())) {
-                                things.add(closestObstacle);
-                            }
-                        }
-                    }*/
 
 
                     handsMO.setEvaluation(getActivation());
