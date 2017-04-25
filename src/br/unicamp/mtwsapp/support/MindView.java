@@ -226,9 +226,9 @@ public class MindView extends javax.swing.JFrame {
     private void createObjectsInWorld(){
         try {
             Random random = new Random();
-            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
-            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
-            World.createJewel(random.nextInt(5), r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(6), r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(6), r.nextInt(800), r.nextInt(600));
+            World.createJewel(random.nextInt(6), r.nextInt(800), r.nextInt(600));
             World.createFood(random.nextInt(2), r.nextInt(800), r.nextInt(600));
             World.createFood(random.nextInt(2), r.nextInt(800), r.nextInt(600));
         } catch (Exception e) {

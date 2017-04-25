@@ -58,7 +58,7 @@ public class AgentMind extends Mind {
         MemoryObject closestObstacleMO;
         MemoryObject hiddenObjetecsMO;
         int reachDistance = 65;
-        int brickDistance = 45;
+        int brickDistance = 30;
 
         //Initialize Memory Objects
         legsMO = createMemoryObject("LEGS", "");

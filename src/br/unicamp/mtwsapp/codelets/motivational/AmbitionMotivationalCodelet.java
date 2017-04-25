@@ -57,6 +57,7 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
                 ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
             }
         }
+
         //System.out.println("Score:" + ((CreatureInnerSense) cisMO.getI()).getScore() + " Ambition:" + ambitionDeficit);
 
         ((CreatureInnerSense) cisMO.getI()).setLeafletCompleteRate(ambitionDeficit * 100);
@@ -67,8 +68,12 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
         if (activation > 1)
             activation = 1;
 
-        if (activation == 0)
+        if (activation == 0 && ambitionDeficit < 1) {
             activation = 0.05;
+        }
+        else if(ambitionDeficit == 1) {
+            activation = 0;
+        }
 
         return activation;
     }

@@ -13,6 +13,7 @@ import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.MovingAverage;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -84,6 +85,29 @@ public class GenerateReport {
 
         });
 
+
+        XYSeries experimentAverage = new XYSeries("Experiments' Average");
+
+
+        for (double i=1; i <= 900; i++){
+
+            double finalI = i;
+
+            List<Result> timeResult = graph.results.stream().filter(result -> ((double)result.x) == finalI).collect(Collectors.toList());
+
+            final double[] meanY = {0};
+
+            timeResult.stream().forEach(result -> {
+                meanY[0] += (double)result.y;
+
+            });
+
+            experimentAverage.add(i, meanY[0]/timeResult.size());
+        }
+
+        xySeriesCollection.addSeries(experimentAverage);
+
+
         final JFreeChart chart = ChartFactory.createXYLineChart(
                 title,
                 graph.xTitle,
@@ -95,7 +119,13 @@ public class GenerateReport {
                 false
         );
 
+        //TimeSeries dataset3 = MovingAverage.createMovingAverage(t1, "LT", 49, 49);
+
+        //XYDataset experimentAverage = MovingAverage.createMovingAverage(xySeriesCollection, "Experiment Average", 50, 0);
+
+
         XYPlot xyPlot = (XYPlot) chart.getPlot();
+        //xyPlot.setDataset(0, experimentAverage);
         xyPlot.setDomainCrosshairVisible(true);
         xyPlot.setRangeCrosshairVisible(true);
         XYLineAndShapeRenderer xyLineAndShapeRenderer = (XYLineAndShapeRenderer)xyPlot.getRenderer();

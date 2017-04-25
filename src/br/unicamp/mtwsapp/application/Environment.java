@@ -27,11 +27,12 @@ public class Environment {
             Random rand = new Random();
 
             World.createFood(rand.nextInt(2), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(0, rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(1, rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(2, rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(3, rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(4, rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             //World.createJewel(5, rand.nextInt(width), rand.nextInt(height));
 
             int x = rand.nextInt(width);
