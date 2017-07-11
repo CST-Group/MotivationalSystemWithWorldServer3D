@@ -129,7 +129,7 @@ public class GenerateReport {
         xyPlot.setDomainCrosshairVisible(true);
         xyPlot.setRangeCrosshairVisible(true);
         XYLineAndShapeRenderer xyLineAndShapeRenderer = (XYLineAndShapeRenderer)xyPlot.getRenderer();
-        xyLineAndShapeRenderer.setBaseShapesVisible(true);
+        xyLineAndShapeRenderer.setBaseShapesVisible(false);
 
         Font font3 = new Font("Dialog", Font.PLAIN, 20);
         xyPlot.getDomainAxis().setLabelFont(font3);

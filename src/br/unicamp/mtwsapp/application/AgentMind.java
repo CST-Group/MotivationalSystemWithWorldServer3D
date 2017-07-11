@@ -6,7 +6,7 @@ import br.unicamp.cst.motivational.*;
 import br.unicamp.cst.representation.owrl.AbstractObject;
 import br.unicamp.cst.representation.owrl.Property;
 import br.unicamp.cst.representation.owrl.QualityDimension;
-import br.unicamp.mtwsapp.codelets.appraisal.CurrentAppraisal;
+import br.unicamp.mtwsapp.codelets.appraisal.CurrentAppraisalCodelet;
 import br.unicamp.mtwsapp.codelets.emotional.AmbitionEmotionalCodelet;
 import br.unicamp.mtwsapp.codelets.emotional.HungerEmotionalCodelet;
 import br.unicamp.mtwsapp.codelets.mood.AmbitionMoodCodelet;
@@ -26,7 +26,6 @@ import br.unicamp.mtwsapp.codelets.perception.JewelDetector;
 import br.unicamp.mtwsapp.codelets.sensors.InnerSense;
 import br.unicamp.mtwsapp.codelets.sensors.Vision;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
@@ -316,7 +315,7 @@ public class AgentMind extends Mind {
 
 
         // Appraisal Codelet
-        CurrentAppraisal currentAppraisal = new CurrentAppraisal("CurrentAppraisal");
+        CurrentAppraisalCodelet currentAppraisalCodelet = new CurrentAppraisalCodelet("CurrentAppraisalCodelet");
 
         AbstractObject perceptionAO = new AbstractObject("CurrentPerception");
         Property innerSenseProperty = new Property("InnerSense");
@@ -329,15 +328,15 @@ public class AgentMind extends Mind {
         perceptionAO.addProperty(innerSenseProperty);
 
         MemoryObject inputPerceptionMO = createMemoryObject(AppraisalCodelet.INPUT_ABSTRACT_OBJECT_MEMORY, perceptionAO);
-        currentAppraisal.addInput(inputPerceptionMO);
+        currentAppraisalCodelet.addInput(inputPerceptionMO);
 
         MemoryObject outputPerceptionMO = createMemoryObject(AppraisalCodelet.OUTPUT_ABSTRACT_OBJECT_MEMORY);
-        currentAppraisal.addOutput(outputPerceptionMO);
+        currentAppraisalCodelet.addOutput(outputPerceptionMO);
 
         MemoryObject outputAppraisalMO = createMemoryObject(AppraisalCodelet.OUTPUT_APPRAISAL_MEMORY);
-        currentAppraisal.addOutput(outputAppraisalMO);
+        currentAppraisalCodelet.addOutput(outputAppraisalMO);
 
-        insertCodelet(currentAppraisal);
+        insertCodelet(currentAppraisalCodelet);
         //==================================
 
         // Mood Codelets
@@ -409,7 +408,7 @@ public class AgentMind extends Mind {
         emCodelets.add(ambitionEmotionalCodelet);
 
         List<Codelet> apCodelets = new ArrayList<>();
-        apCodelets.add(currentAppraisal);
+        apCodelets.add(currentAppraisalCodelet);
 
         List<Codelet> mdCodelets = new ArrayList<>();
         mdCodelets.add(hungerMoodCodelet);

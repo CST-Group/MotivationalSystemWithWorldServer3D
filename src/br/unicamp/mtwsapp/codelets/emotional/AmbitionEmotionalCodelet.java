@@ -21,7 +21,6 @@ public class AmbitionEmotionalCodelet extends EmotionalCodelet {
     }
 
     public double distortionFunction(double value){
-        return Math.sinh(21d/24d * value);
-        //return Math.sinh(7/8 - 7*value/4);
+        return Math.sinh(7d/8d * value);
     }
 }

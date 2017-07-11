@@ -4,7 +4,7 @@ import br.unicamp.cst.motivational.Appraisal;
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.Mood;
 import br.unicamp.cst.motivational.MoodCodelet;
-import br.unicamp.mtwsapp.codelets.appraisal.CurrentAppraisal;
+import br.unicamp.mtwsapp.codelets.appraisal.CurrentAppraisalCodelet;
 
 import java.util.List;
 
@@ -29,10 +29,10 @@ public class AmbitionMoodCodelet extends MoodCodelet {
 
         Drive ambitionDrive = listOfDrives.get(0);
 
-        if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisal.STATE_GOOD)){
+        if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_GOOD)){
             moodValue = appraisal.getEvaluation();
             state = STATE_AMBITIOUS;
-        }else if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisal.STATE_BAD)){
+        }else if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_BAD)){
             moodValue = - appraisal.getEvaluation();
             state = STATE_SATISFIED;
         } else{

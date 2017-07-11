@@ -16,7 +16,7 @@ import com.fuzzylite.variable.OutputVariable;
 /**
  * Created by du on 08/06/17.
  */
-public class CurrentAppraisal extends AppraisalCodelet {
+public class CurrentAppraisalCodelet extends AppraisalCodelet {
 
     public static final String STATE_NORMAL = "STATE_NORMAL";
     public static final String STATE_GOOD = "STATE_GOOD";
@@ -35,7 +35,7 @@ public class CurrentAppraisal extends AppraisalCodelet {
     private OutputVariable outputOV;
     private RuleBlock ruleBlock;
 
-    public CurrentAppraisal(String id) {
+    public CurrentAppraisalCodelet(String id) {
         super(id);
 
         setEngine(new Engine(id));
@@ -100,7 +100,7 @@ public class CurrentAppraisal extends AppraisalCodelet {
     public void buildLeafletInput(){
         setLeafletIV(new InputVariable("Leaflet"));
         getLeafletIV().setEnabled(true);
-        getLeafletIV().setRange(0.000, 1.000);
+        getLeafletIV().setRange(0.000, 100.000);
         getLeafletIV().addTerm(new Trapezoid(AMBITIOUS, 0, 0, 20, 40));
         getLeafletIV().addTerm(new Trapezoid(NORMAL, 20, 40, 60, 80));
         getLeafletIV().addTerm(new Trapezoid(SATISFIED, 60, 80, 100, 100));
