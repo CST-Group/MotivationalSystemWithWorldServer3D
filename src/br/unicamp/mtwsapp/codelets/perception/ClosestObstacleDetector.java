@@ -28,40 +28,41 @@ public class ClosestObstacleDetector extends Codelet {
     private final Creature creature;
     private final int reachDistance;
 
-    public ClosestObstacleDetector(Creature creature, int reachDistance) {
+    public ClosestObstacleDetector(String name, Creature creature, int reachDistance) {
         this.creature = creature;
         this.reachDistance = reachDistance;
+        this.setName(name);
     }
 
     @Override
     public void accessMemoryObjects() {
-        if(visionMO == null)
-            this.visionMO = (MemoryObject) this.getInput("VISION");
+        if(getVisionMO() == null)
+            this.setVisionMO((MemoryObject) this.getInput("VISION"));
 
-        if(innerSenseMO == null)
-            this.innerSenseMO = (MemoryObject) this.getInput("INNER");
+        if(getInnerSenseMO() == null)
+            this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
 
-        if(closestObstacleMO == null)
-            this.closestObstacleMO = (MemoryObject) this.getOutput("CLOSEST_OBSTACLE");
+        if(getClosestObstacleMO() == null)
+            this.setClosestObstacleMO((MemoryObject) this.getOutput("CLOSEST_OBSTACLE"));
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         Thing closest_obstacle = null;
-        known = Collections.synchronizedList((List<Thing>) visionMO.getI());
+        setKnown(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
         //closestObstacleMO.setI(closest_obstacle);
         
-        synchronized (known) {
-            if (!known.isEmpty()) {
+        synchronized (getKnown()) {
+            if (!getKnown().isEmpty()) {
                 //Iterate over objects in vision, looking for the closest apple
-                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
+                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
                 for (Thing t : myknown) {
 
                     String objectName = t.getName();
 
                     if(objectName.contains("Brick")) {
-                        if (isNear(t, reachDistance) != null) {
-                            closest_obstacle = isNear(t, reachDistance);
+                        if (isNear(t, getReachDistance()) != null) {
+                            closest_obstacle = isNear(t, getReachDistance());
                         }
                     }
                     else{
@@ -72,18 +73,18 @@ public class ClosestObstacleDetector extends Codelet {
                 }
 
                 if (closest_obstacle != null) {
-                    if (closestObstacleMO.getI() == null || !closestObstacleMO.getI().equals(closest_obstacle)) {
-                        closestObstacleMO.setI(closest_obstacle);
+                    if (getClosestObstacleMO().getI() == null || !getClosestObstacleMO().getI().equals(closest_obstacle)) {
+                        getClosestObstacleMO().setI(closest_obstacle);
                     }
 
                 } else {
                     
                     closest_obstacle = null;
-                    closestObstacleMO.setI(closest_obstacle);
+                    getClosestObstacleMO().setI(closest_obstacle);
                 }
             } else { 
                 closest_obstacle = null;
-                closestObstacleMO.setI(closest_obstacle);
+                getClosestObstacleMO().setI(closest_obstacle);
             }
         }
     }//end proc
@@ -91,8 +92,8 @@ public class ClosestObstacleDetector extends Codelet {
     public Thing isNear(Thing thing, double gap) {
         Thing result = null;
 
-        if (((thing.getAttributes().getX1() - gap) <= creature.getPosition().getX() && (thing.getAttributes().getX2() + gap) >= creature.getPosition().getX())
-                && ((thing.getAttributes().getY1() - gap) <= creature.getPosition().getY() && (thing.getAttributes().getY2() + gap) >= creature.getPosition().getY())) {
+        if (((thing.getAttributes().getX1() - gap) <= getCreature().getPosition().getX() && (thing.getAttributes().getX2() + gap) >= getCreature().getPosition().getX())
+                && ((thing.getAttributes().getY1() - gap) <= getCreature().getPosition().getY() && (thing.getAttributes().getY2() + gap) >= getCreature().getPosition().getY())) {
             result = thing;
         }
         return result;
@@ -108,5 +109,44 @@ public class ClosestObstacleDetector extends Codelet {
         }
     }
 
-    
+
+    public MemoryObject getVisionMO() {
+        return visionMO;
+    }
+
+    public void setVisionMO(MemoryObject visionMO) {
+        this.visionMO = visionMO;
+    }
+
+    public MemoryObject getClosestObstacleMO() {
+        return closestObstacleMO;
+    }
+
+    public void setClosestObstacleMO(MemoryObject closestObstacleMO) {
+        this.closestObstacleMO = closestObstacleMO;
+    }
+
+    public MemoryObject getInnerSenseMO() {
+        return innerSenseMO;
+    }
+
+    public void setInnerSenseMO(MemoryObject innerSenseMO) {
+        this.innerSenseMO = innerSenseMO;
+    }
+
+    public List<Thing> getKnown() {
+        return known;
+    }
+
+    public void setKnown(List<Thing> known) {
+        this.known = known;
+    }
+
+    public Creature getCreature() {
+        return creature;
+    }
+
+    public int getReachDistance() {
+        return reachDistance;
+    }
 }

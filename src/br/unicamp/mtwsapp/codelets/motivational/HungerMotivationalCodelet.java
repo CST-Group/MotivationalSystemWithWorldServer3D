@@ -18,7 +18,7 @@ public class HungerMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
         Memory cisMO = sensorsMemory.get(0);
         CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();

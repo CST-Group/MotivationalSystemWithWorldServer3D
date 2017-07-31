@@ -18,7 +18,7 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
         double closestActivation = 0;
         double obstacleStimulus = 0;

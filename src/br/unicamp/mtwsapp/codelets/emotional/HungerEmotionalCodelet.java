@@ -10,19 +10,19 @@ import java.util.List;
 /**
  * Created by du on 11/06/17.
  */
-public class HungerEmotionalCodelet extends EmotionalCodelet{
+public class HungerEmotionalCodelet extends EmotionalCodelet {
     public HungerEmotionalCodelet(String id) throws CodeletActivationBoundsException {
         super(id);
     }
 
     @Override
-    public double calculateEmotionalDistortion(List<Drive> listOfDrives, Mood mood) {
+    public synchronized double calculateEmotionalDistortion(List<Drive> listOfDrives, Mood mood) {
         return distortionFunction(mood.getValue());
     }
 
 
-    public double distortionFunction(double value){
+    public double distortionFunction(double value) {
         //return -Math.tanh(4*value - 2);
-        return Math.tanh(5d/2d*value);
+        return Math.tanh(5d / 2d * value);
     }
 }

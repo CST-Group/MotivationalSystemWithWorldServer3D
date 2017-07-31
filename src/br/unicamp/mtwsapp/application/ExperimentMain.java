@@ -14,7 +14,9 @@ public class ExperimentMain {
 
     public ExperimentMain() {
         //WS3DProxy.logger.setLevel(Level.SEVERE);
-        Logger.getLogger("br/unicamp/mtwsapp/codelets").setLevel(Level.SEVERE);
+        //Logger.getLogger("br/unicamp/mtwsapp/codelets").setLevel(Level.SEVERE);
+        logger.setUseParentHandlers(false);
+
         // Create Environment
         Environment env = new Environment(); //Creates only a creature and some apples
         AgentMind a = new AgentMind(env);  // Creates the Agent Mind and start it

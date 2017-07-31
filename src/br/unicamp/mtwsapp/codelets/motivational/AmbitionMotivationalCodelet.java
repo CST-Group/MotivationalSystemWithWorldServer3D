@@ -17,51 +17,41 @@ import java.util.List;
  */
 public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
-    private double agentScore = 0;
+
 
     public AmbitionMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
         super(name, level, priority, urgencyThreshold);
     }
 
     @Override
-    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
         Memory cisMO = sensorsMemory.get(0);
-
         Memory knownJewels = sensorsMemory.get(1);
 
         double jewelsStimulus = 0;
-
-        synchronized (knownJewels) {
-
-            if (knownJewels.getI() != null) {
-
-                List<Thing> jewels = (List<Thing>) knownJewels.getI();
-                if (jewels.size() > 0)
-                    jewelsStimulus = 0.2;
-            } else {
-                jewelsStimulus = 0;
-            }
-        }
-
         double ambitionDeficit = 0.0d;
 
-        synchronized (cisMO) {
-            CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
+        if (knownJewels.getI() != null) {
 
-            if (cis.getLeafletList() != null) {
-
-                double collectedNumberLeaflet = getCollectedNumberLeaflet(cis.getLeafletList());
-                double fullNumberLeaflet = getFullNumberLeaflet(cis.getLeafletList());
-
-                ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
-            }
+            List<Thing> jewels = (List<Thing>) knownJewels.getI();
+            if (jewels.size() > 0)
+                jewelsStimulus = 0.2;
+        } else {
+            jewelsStimulus = 0;
         }
 
-        //System.out.println("Score:" + ((CreatureInnerSense) cisMO.getI()).getScore() + " Ambition:" + ambitionDeficit);
+        CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
 
-        ((CreatureInnerSense) cisMO.getI()).setLeafletCompleteRate(ambitionDeficit * 100);
-        ((CreatureInnerSense) cisMO.getI()).setScore(agentScore);
+        /*if (cis.getLeafletList() != null) {
+
+            double collectedNumberLeaflet = getCollectedNumberLeaflet(cis.getLeafletList());
+            double fullNumberLeaflet = getFullNumberLeaflet(cis.getLeafletList());
+
+            ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
+        }*/
+
+        ambitionDeficit = cis.getLeafletCompleteRate()/100;
 
         double activation = Math.max(ambitionDeficit, ambitionDeficit * (1 + jewelsStimulus));
 
@@ -70,8 +60,7 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
         if (activation == 0 && ambitionDeficit < 1) {
             activation = 0.05;
-        }
-        else if(ambitionDeficit == 1) {
+        } else if (ambitionDeficit == 1) {
             activation = 0;
         }
 
@@ -106,17 +95,15 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
                 if (leaflet.getTotalNumberOfType(color) != -1) {
                     totalJewels += leaflet.getTotalNumberOfType(color);
 
-                    if(leaflet.getMissingNumberOfType(color) > 0)
+                    if (leaflet.getMissingNumberOfType(color) > 0)
                         countLeaflet++;
                 }
             }
 
-            if(countLeaflet == 0)
+            if (countLeaflet == 0)
                 totalScore += leaflet.getSituation();
 
         }
-
-        this.agentScore = totalScore;
 
         return totalJewels;
     }

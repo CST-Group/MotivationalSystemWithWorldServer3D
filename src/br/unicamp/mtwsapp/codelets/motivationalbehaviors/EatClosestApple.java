@@ -30,7 +30,8 @@ public class EatClosestApple extends Codelet {
     Thing closestApple;
     CreatureInnerSense cis;
 
-    public EatClosestApple(int reachDistance) {
+    public EatClosestApple(String name, int reachDistance) {
+        this.setName(name);
         this.reachDistance = reachDistance;
     }
 
@@ -43,51 +44,36 @@ public class EatClosestApple extends Codelet {
         if (closestAppleMO == null)
             closestAppleMO = (MemoryObject) this.getInput("CLOSEST_APPLE");
 
-        if (innerSenseMO == null)
-            innerSenseMO = (MemoryObject) this.getInput("INNER");
-
         if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_EAT_APPLE");
 
         if (hiddenApplesMO == null)
             hiddenApplesMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
 
+        if(innerSenseMO == null){
+            innerSenseMO = (MemoryObject) this.getInput("INNER");
+        }
+
     }
 
     @Override
     public void calculateActivation() {
 
-        /*try {
-            if (closestAppleMO.getI() != null) {
-                setActivation(1);
-            } else {
-
+        Drive drive = (Drive) drivesMO.getI();
+        try {
+            if (drive != null)
+                setActivation(drive.getActivation());
+            else
                 setActivation(0);
 
-            }
-
-        } catch (CodeletActivationBoundsException ex) {
-            Logger.getLogger(GoToApple.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-
-        synchronized (drivesMO) {
-            Drive drive = (Drive) drivesMO.getI();
-            try {
-                if (drive != null)
-                    setActivation(drive.getActivation());
-                else
-                    setActivation(0);
-
-            } catch (CodeletActivationBoundsException e) {
-                e.printStackTrace();
-            }
+        } catch (CodeletActivationBoundsException e) {
+            e.printStackTrace();
         }
-
 
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         String appleName = "";
         closestApple = (Thing) closestAppleMO.getI();
         cis = (CreatureInnerSense) innerSenseMO.getI();
@@ -120,13 +106,12 @@ public class EatClosestApple extends Codelet {
             JSONObject message = new JSONObject();
             try {
                 if (distance < reachDistance) { //eat it
-                    if(closestApple.hidden){
+                    if (closestApple.hidden) {
                         message.put("OBJECT", appleName);
                         message.put("ACTION", "UNEARTH");
                         handsMO.setEvaluation(getActivation());
                         handsMO.setI(message.toString());
-                    }
-                    else {
+                    } else {
                         message.put("OBJECT", appleName);
                         message.put("ACTION", "EATIT");
                         handsMO.setEvaluation(getActivation());

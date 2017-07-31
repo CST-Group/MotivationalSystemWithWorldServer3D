@@ -23,11 +23,9 @@ public class HungerMoodCodelet extends MoodCodelet {
     }
 
     @Override
-    public Mood moodGeneration(List<Drive> listOfDrives, Appraisal appraisal, List<Object> sensors) {
+    public synchronized Mood moodGeneration(List<Drive> listOfDrives, Appraisal appraisal, List<Object> sensors) {
         double moodValue;
         String state;
-
-        Drive hungerDrive = listOfDrives.get(0);
 
         if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_BAD)){
             moodValue = appraisal.getEvaluation();

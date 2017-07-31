@@ -27,7 +27,8 @@ public class GoToApple extends Codelet {
     private int creatureBasicSpeed;
     private Creature creature;
 
-    public GoToApple(int creatureBasicSpeed, Creature creature) {
+    public GoToApple(String name, int creatureBasicSpeed, Creature creature) {
+        this.setName(name);
         this.creatureBasicSpeed = creatureBasicSpeed;
         this.creature = creature;
     }
@@ -49,67 +50,65 @@ public class GoToApple extends Codelet {
 
     @Override
     public void calculateActivation() {
-        synchronized (drivesMO) {
-            Drive drive = (Drive) drivesMO.getI();
-            try {
-                if (drive != null) {
-                    setActivation(drive.getActivation());
-                } else {
-                    setActivation(0);
-                }
-            } catch (CodeletActivationBoundsException e) {
-                e.printStackTrace();
+        Drive drive = (Drive) drivesMO.getI();
+        try {
+            if (drive != null) {
+                setActivation(drive.getActivation());
+            } else {
+                setActivation(0);
             }
+        } catch (CodeletActivationBoundsException e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override
     public synchronized void proc() {
 
-        synchronized (knownApplesMO) {
-            List<Thing> apples = (List<Thing>) knownApplesMO.getI();
+        List<Thing> apples = (List<Thing>) knownApplesMO.getI();
 
-            synchronized (legsMO) {
-                synchronized (apples) {
-                    if (!apples.isEmpty()) {
-                        double appleX = 0;
-                        double appleY = 0;
-                        try {
-                            appleX = apples.get(0).getX1();
-                            appleY = apples.get(0).getY1();
+        synchronized (legsMO) {
+            synchronized (apples) {
+                if (!apples.isEmpty()) {
+                    double appleX = 0;
+                    double appleY = 0;
+                    try {
+                        appleX = apples.get(0).getX1();
+                        appleY = apples.get(0).getY1();
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
 
-                        JSONObject message = new JSONObject();
-                        try {
-                            message.put("ACTION", "GOTO");
-                            message.put("X", (int) appleX);
-                            message.put("Y", (int) appleY);
-                            message.put("SPEED", creatureBasicSpeed);
+                    JSONObject message = new JSONObject();
+                    try {
+                        message.put("ACTION", "GOTO");
+                        message.put("X", (int) appleX);
+                        message.put("Y", (int) appleY);
+                        message.put("SPEED", creatureBasicSpeed);
 
-                            legsMO.setEvaluation(getActivation());
-                            legsMO.setI(message.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        legsMO.setEvaluation(getActivation());
+                        legsMO.setI(message.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
-                    } else {
-                        JSONObject message = new JSONObject();
-                        try {
-                            message.put("ACTION", "FORAGE");
-                            legsMO.setI(message.toString());
-                            legsMO.setEvaluation(getActivation());
+                } else {
+                    JSONObject message = new JSONObject();
+                    try {
+                        message.put("ACTION", "FORAGE");
+                        legsMO.setI(message.toString());
+                        legsMO.setEvaluation(getActivation());
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
+
     }
 
 }

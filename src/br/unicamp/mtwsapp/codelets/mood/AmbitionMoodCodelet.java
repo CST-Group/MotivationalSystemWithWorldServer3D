@@ -22,12 +22,10 @@ public class AmbitionMoodCodelet extends MoodCodelet {
     }
 
     @Override
-    public Mood moodGeneration(List<Drive> listOfDrives, Appraisal appraisal, List<Object> sensors) {
+    public synchronized Mood moodGeneration(List<Drive> listOfDrives, Appraisal appraisal, List<Object> sensors) {
 
         double moodValue;
         String state;
-
-        Drive ambitionDrive = listOfDrives.get(0);
 
         if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_GOOD)){
             moodValue = appraisal.getEvaluation();

@@ -30,33 +30,40 @@ public class HandsActionCodelet extends Codelet {
     private String previousHandsAction = "";
     private Creature c;
     private Random r = new Random();
-    static Logger log = Logger.getLogger(HandsActionCodelet.class.getCanonicalName());
+    private static Logger log = Logger.getLogger(HandsActionCodelet.class.getCanonicalName());
 
-    public HandsActionCodelet(Creature nc) {
-        c = nc;
+    public HandsActionCodelet(String name, Creature nc) {
+        setC(nc);
+        this.setName(name);
+    }
+
+    public static Logger getLog() {
+        return log;
+    }
+
+    public static void setLog(Logger log) {
+        HandsActionCodelet.log = log;
     }
 
     @Override
     public void accessMemoryObjects() {
-        if (behaviorsMC == null)
-            behaviorsMC = (MemoryContainer) this.getInput("BEHAVIORS_MC");
+        if (getBehaviorsMC() == null)
+            setBehaviorsMC((MemoryContainer) this.getInput("BEHAVIORS_MC"));
 
-        if (hiddenApplesMO == null)
-            hiddenApplesMO = (MemoryObject) this.getInput("HIDDEN_THINGS");
+        if (getHiddenApplesMO() == null)
+            setHiddenApplesMO((MemoryObject) this.getOutput("HIDDEN_THINGS"));
 
-        if(visionMO == null)
-            visionMO = (MemoryObject) this.getInput("VISION");
+        if (getVisionMO() == null)
+            setVisionMO((MemoryObject) this.getInput("VISION"));
 
 
     }
 
-    public void proc() {
-        synchronized (behaviorsMC) {
+    public synchronized void proc() {
+            if (getBehaviorsMC().getI() != null) {
+                String command = (String) getBehaviorsMC().getI();
 
-            if (behaviorsMC.getI() != null) {
-                String command = (String) behaviorsMC.getI();
-
-                if (!command.equals("") && (!command.equals(previousHandsAction))) {
+                if (!command.equals("") && (!command.equals(getPreviousHandsAction()))) {
                     JSONObject jsonAction;
                     try {
                         jsonAction = new JSONObject(command);
@@ -64,93 +71,146 @@ public class HandsActionCodelet extends Codelet {
                             String action = jsonAction.getString("ACTION");
                             String objectName = jsonAction.getString("OBJECT");
                             if (action.equals("PICKUP")) {
-                                try {
-                                    c.putInSack(objectName);
-                                } catch (Exception e) {
-
+                                if (!getPreviousHandsAction().contains(action)) {
+                                    try {
+                                        getC().putInSack(objectName);
+                                        getC().rotate(3);
+                                    } catch (CommandExecException e) {
+                                        e.printStackTrace();
+                                    }
+                                    getLog().info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
                                 }
-                                log.info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
-
                             }
                             if (action.equals("EATIT")) {
-                                try {
-                                    c.eatIt(objectName);
-                                } catch (Exception e) {
+                                if (!getPreviousHandsAction().contains(action)) {
+                                    try {
+                                        getC().eatIt(objectName);
+                                        getC().rotate(3);
+                                    } catch (Exception e) {
 
+                                    }
+                                    getLog().info("Sending EAT command to agent:****** " + objectName + "**********");
                                 }
-
-                                log.info("Sending EAT command to agent:****** " + objectName + "**********");
                             }
                             if (action.equals("BURY")) {
-                                try {
-                                    c.hideIt(objectName);
+                                if (!getPreviousHandsAction().contains(action)) {
+                                    try {
+                                        getC().hideIt(objectName);
 
-                                    List<Thing> vision = (List<Thing>) visionMO.getI();
+                                        List<Thing> vision = (List<Thing>) getVisionMO().getI();
 
-                                    Thing closestObstacle = vision.stream().filter(v->v.getName().equals(objectName)).collect(Collectors.toList()).get(0);
+                                        List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
+                                        //Thing closestObstacle = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList()).get(0);
 
-                                    if(closestObstacle.getName().contains("Food")) {
-                                        closestObstacle.hidden = true;
+                                        if(thingsA.size() > 0) {
+                                            Thing closestObstacle = thingsA.get(0);
+                                            if (closestObstacle.getName().contains("Food")) {
+                                                closestObstacle.hidden = true;
 
-                                        List<Thing> things = (List<Thing>) hiddenApplesMO.getI();
+                                                List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
 
-                                        if (things.size() == 0) {
-                                            things.add(closestObstacle);
-                                        } else {
-                                            for (int i = 0; i < things.size(); i++) {
-                                                if (!things.get(i).getName().equals(closestObstacle.getName())) {
+                                                if (things.size() == 0) {
                                                     things.add(closestObstacle);
+                                                } else {
+                                                    for (int i = 0; i < things.size(); i++) {
+                                                        if (!things.get(i).getName().equals(closestObstacle.getName())) {
+                                                            things.add(closestObstacle);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
+
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
 
-                                } catch (Exception e) {
-
+                                    getLog().info("Sending BURY command to agent:****** " + objectName + "**********");
                                 }
-
-                                log.info("Sending BURY command to agent:****** " + objectName + "**********");
                             }
                             if (action.equals("UNEARTH")) {
+                                if (!getPreviousHandsAction().contains(action)) {
+                                    try {
 
-                                try {
-                                    c.unhideIt(objectName);
-                                    c.eatIt(objectName);
-                                } catch (CommandExecException e) {
-                                    e.printStackTrace();
-                                }
+                                        getC().unhideIt(objectName);
+                                        getC().eatIt(objectName);
+                                        getC().rotate(3);
 
-                                List<Thing> things = (List<Thing>) hiddenApplesMO.getI();
-
-
-                                for (int i = 0; i < things.size(); i++) {
-                                    if (things.get(i).getName().equals(objectName)) {
-                                        //things.get(i).hidden = false;
-                                        things.remove(i);
-                                        break;
+                                    } catch (CommandExecException e) {
+                                        e.printStackTrace();
                                     }
+
+                                    List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
+                                    for (int i = 0; i < things.size(); i++) {
+                                        if (things.get(i).getName().equals(objectName)) {
+                                            things.remove(i);
+                                            break;
+                                        }
+                                    }
+                                    getLog().info("Sending UNEARTH command to agent:****** " + objectName + "**********");
                                 }
-
-
-                                log.info("Sending UNEARTH command to agent:****** " + objectName + "**********");
                             }
-
-
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
                 }
-                previousHandsAction = command;
+                setPreviousHandsAction(command);
             }
-        }
-    }//end proc
+
+
+    }
 
     @Override
     public void calculateActivation() {
 
     }
 
+    public MemoryContainer getBehaviorsMC() {
+        return behaviorsMC;
+    }
 
+    public void setBehaviorsMC(MemoryContainer behaviorsMC) {
+        this.behaviorsMC = behaviorsMC;
+    }
+
+    public MemoryObject getHiddenApplesMO() {
+        return hiddenApplesMO;
+    }
+
+    public void setHiddenApplesMO(MemoryObject hiddenApplesMO) {
+        this.hiddenApplesMO = hiddenApplesMO;
+    }
+
+    public MemoryObject getVisionMO() {
+        return visionMO;
+    }
+
+    public void setVisionMO(MemoryObject visionMO) {
+        this.visionMO = visionMO;
+    }
+
+    public String getPreviousHandsAction() {
+        return previousHandsAction;
+    }
+
+    public void setPreviousHandsAction(String previousHandsAction) {
+        this.previousHandsAction = previousHandsAction;
+    }
+
+    public Creature getC() {
+        return c;
+    }
+
+    public void setC(Creature c) {
+        this.c = c;
+    }
+
+    public Random getR() {
+        return r;
+    }
+
+    public void setR(Random r) {
+        this.r = r;
+    }
 }

@@ -28,38 +28,39 @@ public class ClosestJewelDetector extends Codelet {
     private final int reachDistance;
     private final Creature creature;
 
-    public ClosestJewelDetector(Creature creature, int reachDistance) {
+    public ClosestJewelDetector(String name, Creature creature, int reachDistance) {
         this.creature = creature;
         this.reachDistance = reachDistance;
+        this.setName(name);
     }
 
     @Override
     public void accessMemoryObjects() {
-        if(knownMO==null)
-            this.knownMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
+        if(getKnownMO() ==null)
+            this.setKnownMO((MemoryObject) this.getInput("KNOWN_JEWELS"));
 
-        if(innerSenseMO == null)
-            this.innerSenseMO = (MemoryObject) this.getInput("INNER");
+        if(getInnerSenseMO() == null)
+            this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
 
-        if(closestJewelMO==null)
-            this.closestJewelMO = (MemoryObject) this.getOutput("CLOSEST_JEWEL");
+        if(getClosestJewelMO() ==null)
+            this.setClosestJewelMO((MemoryObject) this.getOutput("CLOSEST_JEWEL"));
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         Thing closest_jewel = null;
-        known = Collections.synchronizedList((List<Thing>) knownMO.getI());
-        synchronized (known) {
-            if (!known.isEmpty()) {
+        setKnown(Collections.synchronizedList((List<Thing>) getKnownMO().getI()));
+        synchronized (getKnown()) {
+            if (!getKnown().isEmpty()) {
                 //Iterate over objects in vision, looking for the closest apple
-                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
+                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
                 for (Thing t : myknown) {
                     String objectName = t.getName();
                     if (objectName.contains("Jewel")) {
 
-                        double Dnew = creature.calculateDistanceTo(t);
+                        double Dnew = getCreature().calculateDistanceTo(t);
 
-                        if (Dnew <= reachDistance) {
+                        if (Dnew <= getReachDistance()) {
                             closest_jewel = t;
                         }
 
@@ -67,18 +68,18 @@ public class ClosestJewelDetector extends Codelet {
                 }
 
                 if (closest_jewel != null) {
-                    if (closestJewelMO.getI() == null || !closestJewelMO.getI().equals(closest_jewel)) {
-                        closestJewelMO.setI(closest_jewel);
+                    if (getClosestJewelMO().getI() == null || !getClosestJewelMO().getI().equals(closest_jewel)) {
+                        getClosestJewelMO().setI(closest_jewel);
                     }
 
                 } else {
                     //couldn't find any nearby apples
                     closest_jewel = null;
-                    closestJewelMO.setI(closest_jewel);
+                    getClosestJewelMO().setI(closest_jewel);
                 }
             } else { // if there are no known apples closest_apple must be null
                 closest_jewel = null;
-                closestJewelMO.setI(closest_jewel);
+                getClosestJewelMO().setI(closest_jewel);
             }
         }
     }//end proc
@@ -89,4 +90,43 @@ public class ClosestJewelDetector extends Codelet {
     }
 
 
+    public MemoryObject getKnownMO() {
+        return knownMO;
+    }
+
+    public void setKnownMO(MemoryObject knownMO) {
+        this.knownMO = knownMO;
+    }
+
+    public MemoryObject getClosestJewelMO() {
+        return closestJewelMO;
+    }
+
+    public void setClosestJewelMO(MemoryObject closestJewelMO) {
+        this.closestJewelMO = closestJewelMO;
+    }
+
+    public MemoryObject getInnerSenseMO() {
+        return innerSenseMO;
+    }
+
+    public void setInnerSenseMO(MemoryObject innerSenseMO) {
+        this.innerSenseMO = innerSenseMO;
+    }
+
+    public List<Thing> getKnown() {
+        return known;
+    }
+
+    public void setKnown(List<Thing> known) {
+        this.known = known;
+    }
+
+    public int getReachDistance() {
+        return reachDistance;
+    }
+
+    public Creature getCreature() {
+        return creature;
+    }
 }

@@ -25,16 +25,15 @@ import java.util.List;
 public class AvoidColisionObstacle extends Codelet {
 
     private MemoryObject closestObstacleMO;
-    private MemoryObject innerSenseMO;
     private MemoryObject drivesMO;
     private MemoryObject legsMO;
     private MemoryObject handsMO;
     private MemoryObject knownJewelsMO;
 
     Thing closestObstacle;
-    CreatureInnerSense cis;
 
-    public AvoidColisionObstacle() {
+    public AvoidColisionObstacle(String name) {
+        this.setName(name);
     }
 
     @Override
@@ -46,9 +45,6 @@ public class AvoidColisionObstacle extends Codelet {
         if (closestObstacle == null)
             closestObstacleMO = (MemoryObject) this.getInput("CLOSEST_OBSTACLE");
 
-        if (innerSenseMO == null)
-            innerSenseMO = (MemoryObject) this.getInput("INNER");
-
         if (legsMO == null)
             legsMO = (MemoryObject) this.getOutput("LEGS_AVOID_DANGER");
 
@@ -59,31 +55,29 @@ public class AvoidColisionObstacle extends Codelet {
             knownJewelsMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
 
 
-
     }
 
     @Override
     public void calculateActivation() {
-        synchronized (drivesMO) {
-            Drive drive = (Drive) drivesMO.getI();
-            try {
-                if (drive != null) {
-                    setActivation(drive.getActivation());
-                } else {
-                    setActivation(0);
-                }
-            } catch (CodeletActivationBoundsException e) {
-                e.printStackTrace();
+
+        Drive drive = (Drive) drivesMO.getI();
+        try {
+            if (drive != null) {
+                setActivation(drive.getActivation());
+            } else {
+                setActivation(0);
             }
+        } catch (CodeletActivationBoundsException e) {
+            e.printStackTrace();
         }
+
 
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         String obstacleName = "";
         closestObstacle = (Thing) closestObstacleMO.getI();
-        cis = (CreatureInnerSense) innerSenseMO.getI();
 
         //Find distance between closest apple and self
         //If closer than reachDistance, eat the apple

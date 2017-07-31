@@ -1,5 +1,6 @@
 package br.unicamp.mtwsapp.codelets.appraisal;
 
+import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.motivational.Appraisal;
 import br.unicamp.cst.motivational.AppraisalCodelet;
 import br.unicamp.cst.representation.owrl.AbstractObject;
@@ -53,8 +54,8 @@ public class CurrentAppraisalCodelet extends AppraisalCodelet {
         double evaluation = 0d;
         String state = "";
 
-        CreatureInnerSense cis = (CreatureInnerSense) abstractObject.getProperties().get(0).getQualityDimensions().stream()
-                .filter(q -> q.getName().equals("cis")).findFirst().get().getValue();
+        CreatureInnerSense cis = (CreatureInnerSense) ((MemoryObject) abstractObject.getProperties().get(0).getQualityDimensions().stream()
+                .filter(q -> q.getName().equals("cis")).findFirst().get().getValue()).getI();
 
         double leafletCompleteRate = cis.getLeafletCompleteRate();
 

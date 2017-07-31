@@ -16,11 +16,11 @@ public class AmbitionEmotionalCodelet extends EmotionalCodelet {
     }
 
     @Override
-    public double calculateEmotionalDistortion(List<Drive> listOfDrives, Mood mood) {
+    public synchronized double calculateEmotionalDistortion(List<Drive> listOfDrives, Mood mood) {
         return distortionFunction(mood.getValue());
     }
 
-    public double distortionFunction(double value){
-        return Math.sinh(7d/8d * value);
+    public double distortionFunction(double value) {
+        return Math.sinh(7d / 8d * value);
     }
 }

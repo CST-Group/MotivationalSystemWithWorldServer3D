@@ -18,7 +18,6 @@ import org.json.JSONObject;
 import ws3dproxy.model.Thing;
 
 /**
- *
  * @author Du
  */
 public class GoToJewel extends Codelet {
@@ -29,7 +28,8 @@ public class GoToJewel extends Codelet {
 
     private int creatureBasicSpeed;
 
-    public GoToJewel(int creatureBasicSpeed) {
+    public GoToJewel(String name, int creatureBasicSpeed) {
+        this.setName(name);
         this.creatureBasicSpeed = creatureBasicSpeed;
     }
 
@@ -39,49 +39,30 @@ public class GoToJewel extends Codelet {
         if (drivesMO == null)
             drivesMO = (MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
 
-        if(knownJewels == null)
+        if (knownJewels == null)
             knownJewels = (MemoryObject) this.getInput("KNOWN_JEWELS");
 
-        if(legsMO == null)
+        if (legsMO == null)
             legsMO = (MemoryObject) this.getOutput("LEGS_GO_JEWEL");
 
     }
 
     @Override
     public void calculateActivation() {
-        /*try {
-
-            if ((creature.getAttributes().getFuel() / 1000) >= 0.4) {
-                List<Thing> jewels = (List<Thing>) knownJewels.getI();
-                if (!jewels.isEmpty()) {
-                    setActivation(1);
-
-                } else {
-                    setActivation(0);
-                }
-            } else {
+        Drive drive = (Drive) drivesMO.getI();
+        try {
+            if (drive != null)
+                setActivation(drive.getActivation());
+            else
                 setActivation(0);
-            }
-
-        } catch (CodeletActivationBoundsException ex) {
-            Logger.getLogger(GoToApple.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-
-        synchronized (drivesMO) {
-            Drive drive = (Drive) drivesMO.getI();
-            try {
-                if (drive != null)
-                    setActivation(drive.getActivation());
-                else
-                    setActivation(0);
-            } catch (CodeletActivationBoundsException e) {
-                e.printStackTrace();
-            }
+        } catch (CodeletActivationBoundsException e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
 
         List<Thing> jewels = (List<Thing>) knownJewels.getI();
         synchronized (legsMO) {
@@ -114,8 +95,7 @@ public class GoToJewel extends Codelet {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else{
+                } else {
 
                     JSONObject message = new JSONObject();
                     try {

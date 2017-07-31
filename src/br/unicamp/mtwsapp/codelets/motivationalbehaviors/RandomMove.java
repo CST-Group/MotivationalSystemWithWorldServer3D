@@ -19,6 +19,10 @@ public class RandomMove extends Codelet {
     private MemoryObject legsMO;
 
 
+    public RandomMove(String name){
+        this.setName(name);
+    }
+
     @Override
     public void accessMemoryObjects() {
 
@@ -31,8 +35,8 @@ public class RandomMove extends Codelet {
     }
 
     @Override
-    public void calculateActivation() {
-        synchronized (drivesMO) {
+    public synchronized void calculateActivation() {
+
             Drive drive = (Drive) drivesMO.getI();
             try {
                 if (drive != null) {
@@ -43,7 +47,7 @@ public class RandomMove extends Codelet {
             } catch (CodeletActivationBoundsException e) {
                 e.printStackTrace();
             }
-        }
+
     }
 
     @Override

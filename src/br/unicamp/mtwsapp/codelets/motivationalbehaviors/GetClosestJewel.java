@@ -32,7 +32,8 @@ public class GetClosestJewel extends Codelet {
     Thing closestJewel;
     CreatureInnerSense cis;
 
-    public GetClosestJewel(int reachDistance) {
+    public GetClosestJewel(String name, int reachDistance) {
+        this.setName(name);
         this.reachDistance = reachDistance;
     }
 
@@ -44,11 +45,12 @@ public class GetClosestJewel extends Codelet {
         if (closestJewelMO == null)
             closestJewelMO = (MemoryObject) this.getInput("CLOSEST_JEWEL");
 
-        if (innerSenseMO == null)
-            innerSenseMO = (MemoryObject) this.getInput("INNER");
-
         if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_GET_JEWEL");
+
+        if(innerSenseMO == null){
+            innerSenseMO = (MemoryObject) this.getInput("INNER");
+        }
     }
 
 
@@ -66,23 +68,22 @@ public class GetClosestJewel extends Codelet {
         }*/
 
 
-        synchronized (drivesMO) {
-            Drive drive = (Drive) drivesMO.getI();
+        Drive drive = (Drive) drivesMO.getI();
 
-            try {
-                if (drive != null) {
-                    setActivation(drive.getActivation());
-                } else {
-                    setActivation(0);
-                }
-            } catch (CodeletActivationBoundsException e) {
-                e.printStackTrace();
+        try {
+            if (drive != null) {
+                setActivation(drive.getActivation());
+            } else {
+                setActivation(0);
             }
+        } catch (CodeletActivationBoundsException e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         String jewelName = "";
         closestJewel = (Thing) closestJewelMO.getI();
         cis = (CreatureInnerSense) innerSenseMO.getI();

@@ -58,7 +58,7 @@ public class Forage extends Codelet {
     }
 
     @Override
-    public void proc() {
+    public synchronized void proc() {
         known = new ArrayList<>();
         known.addAll((List<Thing>) knownApplesMO.getI());
         known.addAll((List<Thing>) knownJewelsMO.getI());
@@ -70,7 +70,6 @@ public class Forage extends Codelet {
                 legsMO.setEvaluation(getActivation());
 
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

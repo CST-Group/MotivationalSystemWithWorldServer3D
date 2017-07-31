@@ -19,23 +19,27 @@ public class Vision extends Codelet {
     private Creature c;
 
 
-    public Vision(Creature nc) {
-        this.c = nc;
+    public Vision(String name, Creature nc) {
+        this.setName(name);
+        this.setC(nc);
     }
 
     @Override
     public void accessMemoryObjects() {
-        visionMO = (MemoryObject) this.getOutput("VISION");
+        if(getVisionMO() ==null) {
+            setVisionMO((MemoryObject) this.getOutput("VISION"));
+        }
     }
 
     @Override
-    public void proc() {
-        c.updateState();
-        synchronized (visionMO) {
+    public synchronized void proc() {
+        synchronized (getC()) {
+            getC().updateState();
             List<Thing> lt = new ArrayList<>();
-            lt.addAll(c.getThingsInVision());
-            visionMO.setI(lt);
+            lt.addAll(getC().getThingsInVision());
+            getVisionMO().setI(lt);
         }
+
     }
 
     @Override
@@ -48,6 +52,21 @@ public class Vision extends Codelet {
     }
 
 
+    public MemoryObject getVisionMO() {
+        return visionMO;
+    }
+
+    public void setVisionMO(MemoryObject visionMO) {
+        this.visionMO = visionMO;
+    }
+
+    public Creature getC() {
+        return c;
+    }
+
+    public void setC(Creature c) {
+        this.c = c;
+    }
 }
 
 

@@ -8,6 +8,7 @@ package br.unicamp.mtwsapp.codelets.perception;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -26,76 +27,100 @@ public class JewelDetector extends Codelet {
     private MemoryObject knownJewelsMO;
     private Creature creature;
 
-    public JewelDetector(Creature creature) {
-        this.creature = creature;
+    public JewelDetector(String name, Creature creature) {
+        this.setCreature(creature);
+        this.setName(name);
     }
 
     @Override
     public void accessMemoryObjects() {
-        synchronized (this) {
-            if (visionMO == null)
-                this.visionMO = (MemoryObject) this.getInput("VISION");
-        }
 
-        if (knownJewelsMO == null)
-            this.knownJewelsMO = (MemoryObject) this.getOutput("KNOWN_JEWELS");
+        if (getVisionMO() == null)
+            this.setVisionMO((MemoryObject) this.getInput("VISION"));
+
+
+        if (getKnownJewelsMO() == null)
+            this.setKnownJewelsMO((MemoryObject) this.getOutput("KNOWN_JEWELS"));
     }
 
     @Override
-    public void proc() {
-        CopyOnWriteArrayList<Thing> vision;
-        List<Thing> known;
-        synchronized (visionMO) {
-            if (visionMO.getI() != null && knownJewelsMO.getI() != null) {
-                vision = new CopyOnWriteArrayList((List<Thing>) visionMO.getI());
-                known = Collections.synchronizedList((List<Thing>) knownJewelsMO.getI());
+    public synchronized void proc() {
+        List<Thing> vision = null;
+        List<Thing> known = null;
 
-                if (vision.size() != 0) {
-                    Comparator<Thing> comparator = new Comparator<Thing>() {
-                        @Override
-                        public int compare(Thing thing1, Thing thing2) {
-                            int nearThing = creature.calculateDistanceTo(thing2) < creature.calculateDistanceTo(thing1) ? 1 : 0;
-                            return nearThing;
+        if (getVisionMO().getI() != null && getKnownJewelsMO().getI() != null) {
+            vision = new ArrayList<>(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
+            known = Collections.synchronizedList((List<Thing>) getKnownJewelsMO().getI());
+
+            if (vision.size() != 0) {
+                Comparator<Thing> comparator = new Comparator<Thing>() {
+                    @Override
+                    public int compare(Thing thing1, Thing thing2) {
+                        int nearThing = getCreature().calculateDistanceTo(thing2) < getCreature().calculateDistanceTo(thing1) ? 1 : 0;
+                        return nearThing;
+                    }
+                };
+
+                Collections.sort(vision, comparator);
+            }
+
+            if (vision.size() != 0) {
+                for (Thing t : vision) {
+                    boolean found = false;
+                    synchronized (known) {
+                        CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
+                        for (Thing e : myknown) {
+                            if (t.getName().equals(e.getName())) {
+                                found = true;
+                                break;
+                            }
                         }
-                    };
-
-                    Collections.sort(vision, comparator);
-                }
-
-                synchronized (vision) {
-                    if (vision.size() != 0) {
-                        for (Thing t : vision) {
-                            boolean found = false;
-                            synchronized (known) {
-                                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
-                                for (Thing e : myknown) {
-                                    if (t.getName().equals(e.getName())) {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (found == false && t.getName().contains("Jewel")) {
-                                    for (Leaflet leaflet : creature.getLeaflets()) {
-                                        if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
-                                            known.add(t);
-                                            break;
-                                        }
-                                    }
+                        if (found == false && t.getName().contains("Jewel")) {
+                            for (Leaflet leaflet : getCreature().getLeaflets()) {
+                                if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
+                                    known.add(t);
+                                    break;
                                 }
                             }
-
                         }
-                    } else {
-                        known.removeAll(known);
                     }
 
                 }
+            } else {
+                known.removeAll(known);
             }
+
+
         }
+
     }// end proc
 
     @Override
     public void calculateActivation() {
 
+    }
+
+    public MemoryObject getVisionMO() {
+        return visionMO;
+    }
+
+    public void setVisionMO(MemoryObject visionMO) {
+        this.visionMO = visionMO;
+    }
+
+    public MemoryObject getKnownJewelsMO() {
+        return knownJewelsMO;
+    }
+
+    public void setKnownJewelsMO(MemoryObject knownJewelsMO) {
+        this.knownJewelsMO = knownJewelsMO;
+    }
+
+    public Creature getCreature() {
+        return creature;
+    }
+
+    public void setCreature(Creature creature) {
+        this.creature = creature;
     }
 }
