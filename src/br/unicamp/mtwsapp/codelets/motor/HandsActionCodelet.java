@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import br.unicamp.cst.core.entities.Codelet;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -59,8 +60,9 @@ public class HandsActionCodelet extends Codelet {
 
     }
 
-    public synchronized void proc() {
-            if (getBehaviorsMC().getI() != null) {
+    public void proc() {
+
+        if (getBehaviorsMC().getI() != null) {
                 String command = (String) getBehaviorsMC().getI();
 
                 if (!command.equals("") && (!command.equals(getPreviousHandsAction()))) {
@@ -97,7 +99,7 @@ public class HandsActionCodelet extends Codelet {
                                     try {
                                         getC().hideIt(objectName);
 
-                                        List<Thing> vision = (List<Thing>) getVisionMO().getI();
+                                        List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
 
                                         List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
                                         //Thing closestObstacle = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList()).get(0);

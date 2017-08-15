@@ -14,6 +14,7 @@ public class GoalGenaratorCodelet extends GoalCodelet{
 
     @Override
     public Goal goalGeneration(AbstractObject hypoteticalSituation) {
+
         return null;
     }
 }

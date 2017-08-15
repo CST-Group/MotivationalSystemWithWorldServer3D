@@ -15,8 +15,10 @@ import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ws3dproxy.model.Creature;
+import ws3dproxy.model.Leaflet;
 import ws3dproxy.model.Thing;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,10 +32,12 @@ public class AvoidColisionObstacle extends Codelet {
     private MemoryObject handsMO;
     private MemoryObject knownJewelsMO;
 
-    Thing closestObstacle;
+    private Thing closestObstacle;
+    private Creature creature;
 
-    public AvoidColisionObstacle(String name) {
+    public AvoidColisionObstacle(String name, Creature creature) {
         this.setName(name);
+        this.setCreature(creature);
     }
 
     @Override
@@ -100,8 +104,18 @@ public class AvoidColisionObstacle extends Codelet {
             } else {
 
                 if (closestObstacle.getName().contains("Jewel")) {
-                    List<Thing> jewels = (List<Thing>) knownJewelsMO.getI();
-                    if (!jewels.contains(closestObstacle)) {
+                    List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewelsMO.getI());
+
+                    boolean exist = false;
+
+                    for (Leaflet leaflet : getCreature().getLeaflets()) {
+                        if (leaflet.ifInLeaflet(closestObstacle.getMaterial().getColorName())) {
+                            exist = true;
+                            break;
+                        }
+                    }
+
+                    if (!exist) {
                         try {
                             message.put("OBJECT", closestObstacle.getName());
                             message.put("ACTION", "BURY");
@@ -125,8 +139,6 @@ public class AvoidColisionObstacle extends Codelet {
                         legsMO.setI("");
                     }
                 } else {
-
-
                     try {
                         message.put("OBJECT", closestObstacle.getName());
                         message.put("ACTION", "BURY");
@@ -151,4 +163,11 @@ public class AvoidColisionObstacle extends Codelet {
         }
     }
 
+    public Creature getCreature() {
+        return creature;
+    }
+
+    public void setCreature(Creature creature) {
+        this.creature = creature;
+    }
 }

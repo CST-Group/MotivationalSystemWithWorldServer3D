@@ -66,7 +66,7 @@ public class GoToApple extends Codelet {
     @Override
     public synchronized void proc() {
 
-        List<Thing> apples = (List<Thing>) knownApplesMO.getI();
+        List<Thing> apples = Collections.synchronizedList((List<Thing>) knownApplesMO.getI());
 
         synchronized (legsMO) {
             synchronized (apples) {

@@ -10,6 +10,7 @@ import ws3dproxy.model.Thing;
 import ws3dproxy.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
         if (knownJewels.getI() != null) {
 
-            List<Thing> jewels = (List<Thing>) knownJewels.getI();
+            List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewels.getI());
             if (jewels.size() > 0)
                 jewelsStimulus = 0.2;
         } else {

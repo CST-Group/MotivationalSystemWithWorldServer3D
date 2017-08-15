@@ -10,6 +10,8 @@ import br.unicamp.cst.util.MindViewer;
 import br.unicamp.mtwsapp.codelets.appraisal.CurrentAppraisalCodelet;
 import br.unicamp.mtwsapp.codelets.emotional.AmbitionEmotionalCodelet;
 import br.unicamp.mtwsapp.codelets.emotional.HungerEmotionalCodelet;
+import br.unicamp.mtwsapp.codelets.episodic.EpisodicMemoryGeneratorCodelet;
+import br.unicamp.mtwsapp.codelets.imagination.ExpectationCodelet;
 import br.unicamp.mtwsapp.codelets.mood.AmbitionMoodCodelet;
 import br.unicamp.mtwsapp.codelets.mood.HungerMoodCodelet;
 import br.unicamp.mtwsapp.codelets.motivational.BoredomMotivationalCodelet;
@@ -28,6 +30,7 @@ import br.unicamp.mtwsapp.codelets.sensors.InnerSense;
 import br.unicamp.mtwsapp.codelets.sensors.Vision;
 
 import java.util.*;
+import java.util.List;
 
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import br.unicamp.mtwsapp.support.SimulationController;
@@ -63,8 +66,8 @@ public class AgentMind extends Mind {
         MemoryObject knownJewelsMO;
         MemoryObject closestObstacleMO;
         MemoryObject hiddenObjetecsMO;
-        int reachDistance = 65;
-        int brickDistance = 30;
+        int reachDistance = 70;
+        int brickDistance = 40;
         //===============================
 
         closestAppleMO = createMemoryObject("CLOSEST_APPLE");
@@ -238,7 +241,7 @@ public class AgentMind extends Mind {
         getJewel.addOutput(handsGetJewelMO);
         insertCodelet(getJewel);
 
-        Codelet avoidColisionObstacle = new AvoidColisionObstacle("AvoidColisionObstacleMotivationalBehaviorCodelet");
+        Codelet avoidColisionObstacle = new AvoidColisionObstacle("AvoidColisionObstacleMotivationalBehaviorCodelet", env.c);
         MemoryObject legsAvoidColisionMO = createMemoryObject("LEGS_AVOID_DANGER");
         MemoryObject handsAvoidColisionMO = createMemoryObject("HANDS_AVOID_DANGER");
 
@@ -377,13 +380,47 @@ public class AgentMind extends Mind {
 
         //===================================
 
+
+        // Episodic Codelets
+
+        Codelet episodicMemoryGeneratorCodelet = new EpisodicMemoryGeneratorCodelet("EpisodicMemoryGeneratorCodelet", 1);
+        episodicMemoryGeneratorCodelet.addInput(innerSenseMO);
+        episodicMemoryGeneratorCodelet.addInput(visionMO);
+        episodicMemoryGeneratorCodelet.addInput(knownJewelsMO);
+        episodicMemoryGeneratorCodelet.addInput(outputAppraisalMO);
+
+        MemoryContainer drivesMC = createMemoryContainer("INPUT_DRIVES_MEMORY");
+        drivesMC.add(outputAmbitionDriveMO);
+        drivesMC.add(outputHungryDriveMO);
+        drivesMC.add(outputBoredomDriveMO);
+        drivesMC.add(outputAvoidDangerDriveMO);
+
+        episodicMemoryGeneratorCodelet.addInput(drivesMC);
+
+
+        Memory outputEpisodicsMemoryMO = createMemoryObject(EpisodicMemoryGeneratorCodelet.OUTPUT_EPISODIC_MEMORY);
+        episodicMemoryGeneratorCodelet.addOutput(outputEpisodicsMemoryMO);
+        insertCodelet(episodicMemoryGeneratorCodelet);
+
+        //===================================
+
+        // Expectation Codelets
+
+        ExpectationCodelet expectationCodelet = new ExpectationCodelet("ExpectationCodelet", 180);
+        expectationCodelet.addInput(outputEpisodicsMemoryMO);
+        expectationCodelet.addOutput(createMemoryObject(ExpectationCodelet.OUTPUT_EXPECTATION_MEMORY));
+        expectationCodelet.addOutput(createMemoryObject(ExpectationCodelet.OUTPUT_USE_FLAG_MEMORY));
+        insertCodelet(expectationCodelet);
+
+        //===================================
+
+
         //Create and Populate MotivationalSubsystemViewer
         List<Codelet> mtCodelets = new ArrayList<>();
         mtCodelets.add(avoidDangerMotivationalCodelet);
         mtCodelets.add(ambitionMotivationalCodelet);
         mtCodelets.add(hungerMotivationalCodelet);
         mtCodelets.add(boredomMotivationalCodelet);
-
 
         List<Codelet> emCodelets = new ArrayList<>();
         emCodelets.add(hungerEmotionalCodelet);

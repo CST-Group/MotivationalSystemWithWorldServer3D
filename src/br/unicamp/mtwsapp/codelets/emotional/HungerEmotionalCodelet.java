@@ -21,7 +21,7 @@ public class HungerEmotionalCodelet extends EmotionalCodelet {
     }
 
 
-    public double distortionFunction(double value) {
+    public synchronized double distortionFunction(double value) {
         //return -Math.tanh(4*value - 2);
         return Math.tanh(5d / 2d * value);
     }

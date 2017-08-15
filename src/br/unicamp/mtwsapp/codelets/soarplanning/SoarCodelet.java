@@ -253,7 +253,7 @@ public class SoarCodelet extends br.unicamp.cst.bindings.soar.JSoarCodelet {
 
         for (Goal goal : goals) {
 
-            AbstractObject temp = convertToAbstractObject(goal.getGoalAbstractObjects(), "GOAL");
+            AbstractObject temp = convertToAbstractObject(goal.getGoalAbstractObjects(), "Goals");
             temp.addProperty(new Property(goal.getId()));
             go.addAggregatePart(temp);
         }

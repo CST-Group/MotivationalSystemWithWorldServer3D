@@ -9,6 +9,7 @@ import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
+import java.util.Collections;
 import java.util.List;
 
 import br.unicamp.cst.motivational.Drive;
@@ -64,7 +65,7 @@ public class GoToJewel extends Codelet {
     @Override
     public synchronized void proc() {
 
-        List<Thing> jewels = (List<Thing>) knownJewels.getI();
+        List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewels.getI());
         synchronized (legsMO) {
             synchronized (jewels) {
                 if (!jewels.isEmpty()) {

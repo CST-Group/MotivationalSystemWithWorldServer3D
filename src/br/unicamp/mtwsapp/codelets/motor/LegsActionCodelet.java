@@ -118,6 +118,15 @@ public class LegsActionCodelet extends Codelet {
                             previousPositionY = getC().getPosition().getY();
 
                             getC().moveto(speed, targetx, targety);
+
+                            try {
+                                Thread.sleep(400);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            getC().moveto(0, 0, 0);
+
                         }
 
                     } else if (action.equals("AVOID")) {
