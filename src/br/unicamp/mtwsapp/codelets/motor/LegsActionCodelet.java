@@ -57,67 +57,101 @@ public class LegsActionCodelet extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
-        String comm = (String) getBehaviorsMC().getI();
-        if (comm == null)
-            comm = "";
+    public void proc() {
 
-        if (!comm.equals("")) {
-            try {
-                JSONObject command = new JSONObject(comm);
-                if (command.has("ACTION")) {
-                    int x = 0, y = 0;
-                    String action = command.getString("ACTION");
 
-                    if(action.equals("RANDOM")
-                            && getPreviousLegsAction().contains("RANDOM")
-                            && getC().getPosition().getX() == previousPositionX
-                            && getC().getPosition().getY() == previousPositionY){
-                        action = "AVOID";
-                    }
 
-                    if (action.equals("FORAGE")) {
-                        if(!getPreviousLegsAction().contains(action)) {
-                            getLog().info("Sending FORAGE command to agent");
-                            try {
-                                //getC().move(0, 0, getRotation());
-                                getC().rotate(getRotation());
+            String comm = (String) getBehaviorsMC().getI();
+            if (comm == null)
+                comm = "";
 
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+            if (!comm.equals("")) {
+                try {
+                    JSONObject command = new JSONObject(comm);
+                    if (command.has("ACTION")) {
+                        int x = 0, y = 0;
+                        String action = command.getString("ACTION");
+
+                        if (action.equals("RANDOM")
+                                && getPreviousLegsAction().contains("RANDOM")
+                                && getC().getPosition().getX() == previousPositionX
+                                && getC().getPosition().getY() == previousPositionY) {
+                            action = "AVOID";
                         }
 
-                    } else if (action.equals("GOTO")) {
-                        setRotation(getRotation() == 3 ? -3 : 3);
-                        if (!comm.equals(getPreviousLegsAction())) {
-                            double speed = command.getDouble("SPEED");
-                            double targetx = command.getDouble("X");
-                            double targety = command.getDouble("Y");
-                            getLog().info("Sending MOVE command to agent: [" + targetx + "," + targety + "]");
+                        if (action.equals("FORAGE")) {
+                            if (!getPreviousLegsAction().contains(action)) {
+                                getLog().info("Sending FORAGE command to agent");
+                                try {
+                                    //getC().move(0, 0, getRotation());
+                                    getC().rotate(getRotation());
 
-                            try {
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        } else if (action.equals("GOTO")) {
+                            setRotation(getRotation() == 3 ? -3 : 3);
+                            if (!comm.equals(getPreviousLegsAction())) {
+                                double speed = command.getDouble("SPEED");
+                                double targetx = command.getDouble("X");
+                                double targety = command.getDouble("Y");
+                                getLog().info("Sending MOVE command to agent: [" + targetx + "," + targety + "]");
+
+                                try {
+
+                                    getC().moveto(speed, targetx, targety);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        } else if (action.equals("RANDOM")) {
+                            if (!comm.equals(getPreviousLegsAction())) {
+                                setRotation(getRotation() == 3 ? -3 : 3);
+                                double speed = command.getDouble("SPEED");
+                                double targetx = command.getDouble("X");
+                                double targety = command.getDouble("Y");
+
+                                getLog().info("Sending RANDOM command to agent: [" + targetx + "," + targety + "]");
+
+                                previousPositionX = getC().getPosition().getX();
+                                previousPositionY = getC().getPosition().getY();
 
                                 getC().moveto(speed, targetx, targety);
 
-                            } catch (Exception e) {
+                                try {
+                                    Thread.sleep(400);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                                getC().moveto(0, 0, 0);
+                                getC().rotate(getRotation());
+                            }
+
+
+                        } else if (action.equals("AVOID")) {
+
+                            setRotation(getRotation() == 3 ? -3 : 3);
+                            Random rand = new Random();
+                            int random = rand.nextInt(2);
+                            double angle = randomAngle(random);
+
+                            getLog().info("Sending AVOID command to agent: [" + angle + "]");
+
+                            getC().move(-3, -3, getC().getPitch());
+
+                            try {
+                                Thread.sleep(200);
+                            } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                        }
 
-                    } else if (action.equals("RANDOM")) {
-                        if (!getPreviousLegsAction().contains(action)) {
-                            setRotation(getRotation() == 3 ? -3 : 3);
-                            double speed = command.getDouble("SPEED");
-                            double targetx = command.getDouble("X");
-                            double targety = command.getDouble("Y");
+                            getC().rotate(3);
 
-                            getLog().info("Sending RANDOM command to agent: [" + targetx + "," + targety + "]");
-
-                            previousPositionX = getC().getPosition().getX();
-                            previousPositionY = getC().getPosition().getY();
-
-                            getC().moveto(speed, targetx, targety);
 
                             try {
                                 Thread.sleep(400);
@@ -125,62 +159,34 @@ public class LegsActionCodelet extends Codelet {
                                 e.printStackTrace();
                             }
 
-                            getC().moveto(0, 0, 0);
+                            getC().move(3, 3, angle);
 
-                        }
+                            try {
+                                Thread.sleep(200);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            getC().rotate(getRotation());
 
-                    } else if (action.equals("AVOID")) {
-
-                        setRotation(getRotation() == 3 ? -3 : 3);
-                        Random rand = new Random();
-                        int random = rand.nextInt(2);
-                        double angle = randomAngle(random);
-
-                        getLog().info("Sending AVOID command to agent: [" + angle + "]");
-
-                        getC().move(-3, -3, getC().getPitch());
-
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        getC().rotate(3);
-
-
-                        try {
-                            Thread.sleep(400);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        getC().move(3, 3, angle);
-
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else {
-                        setRotation(getRotation() == 3 ? -3 : 3);
-                        getLog().info("Sending STOP command to agent");
-                        try {
-                            getC().moveto(0, 0, 0);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        } else {
+                            setRotation(getRotation() == 3 ? -3 : 3);
+                            getLog().info("Sending STOP command to agent");
+                            try {
+                                getC().moveto(0, 0, 0);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
+                    setPreviousLegsAction(comm);
+                    setK(getK() + 1);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (CommandExecException ex) {
+                    Logger.getLogger(LegsActionCodelet.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                setPreviousLegsAction(comm);
-                setK(getK() + 1);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (CommandExecException ex) {
-                Logger.getLogger(LegsActionCodelet.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+
 
 
     }//end proc

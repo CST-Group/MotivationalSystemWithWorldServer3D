@@ -1,6 +1,7 @@
 package br.unicamp.mtwsapp.memory;
 
 import java.awt.Polygon;
+import java.util.HashMap;
 import java.util.List;
 
 import ws3dproxy.model.Leaflet;
@@ -18,6 +19,7 @@ public class CreatureInnerSense {
     private List<Leaflet> leafletList;
     private double score;
     private double leafletCompleteRate;
+    private HashMap<String, Double> diffJewels;
     
     public String toString() {
         if (getPosition() != null)
@@ -82,6 +84,14 @@ public class CreatureInnerSense {
 
     public void setLeafletCompleteRate(double leafletCompleteRate) {
         this.leafletCompleteRate = leafletCompleteRate;
+    }
+
+    public HashMap<String, Double> getDiffJewels() {
+        return diffJewels;
+    }
+
+    public void setDiffJewels(HashMap<String, Double> diffJewels) {
+        this.diffJewels = diffJewels;
     }
 }
 

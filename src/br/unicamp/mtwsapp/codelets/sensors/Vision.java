@@ -27,19 +27,19 @@ public class Vision extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if(getVisionMO() ==null) {
+        if (getVisionMO() == null) {
             setVisionMO((MemoryObject) this.getOutput("VISION"));
         }
     }
 
     @Override
-    public synchronized void proc() {
-        synchronized (getC()) {
-            getC().updateState();
-            List<Thing> lt = Collections.synchronizedList(new ArrayList<>());
-            lt.addAll(getC().getThingsInVision());
-            getVisionMO().setI(lt);
-        }
+    public void proc() {
+
+        getC().updateState();
+        List<Thing> lt = Collections.synchronizedList(new ArrayList<>());
+        lt.addAll(getC().getThingsInVision());
+        getVisionMO().setI(lt);
+
 
     }
 

@@ -81,7 +81,6 @@ public class GoToApple extends Codelet {
                         e.printStackTrace();
                     }
 
-
                     JSONObject message = new JSONObject();
                     try {
                         message.put("ACTION", "GOTO");

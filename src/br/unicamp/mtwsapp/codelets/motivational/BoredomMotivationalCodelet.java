@@ -48,8 +48,10 @@ public class BoredomMotivationalCodelet extends MotivationalCodelet {
             }
             else{
                 timeCheckPoint = new Date();
-                creaturePositionSaved = cis.getPosition();
+                creaturePositionSaved = actuallyPosition;
             }
+
+
         }
 
         return activation;

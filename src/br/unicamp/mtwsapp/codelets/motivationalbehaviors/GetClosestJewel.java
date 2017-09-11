@@ -11,9 +11,13 @@ import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPickUpRemainingJewels;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanningCodelet;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +31,8 @@ public class GetClosestJewel extends Codelet {
     private MemoryObject closestJewelMO;
     private MemoryObject innerSenseMO;
     private MemoryObject drivesMO;
+    private MemoryObject nextActionMO;
+
     private int reachDistance;
     private MemoryObject handsMO;
     Thing closestJewel;
@@ -51,28 +57,28 @@ public class GetClosestJewel extends Codelet {
         if(innerSenseMO == null){
             innerSenseMO = (MemoryObject) this.getInput("INNER");
         }
+
+        if(nextActionMO == null){
+            nextActionMO = (MemoryObject) this.getInput(SoarPlanningCodelet.OUTPUT_COMMAND_MO);
+        }
     }
 
 
     @Override
     public void calculateActivation() {
-        /*try {
-            if (closestJewelMO.getI() !=  null && (creature.getAttributes().getFuel()/1000) >= 0.4) {
-                setActivation(1);
-            } else {
-                setActivation(0);
-            }
-
-        } catch (CodeletActivationBoundsException ex) {
-            Logger.getLogger(GoToApple.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-
 
         Drive drive = (Drive) drivesMO.getI();
 
         try {
             if (drive != null) {
-                setActivation(drive.getActivation());
+                List<Object> nextAction = (List<Object>)nextActionMO.getI();
+                if (nextAction != null && nextAction.size() > 0){
+                    setActivation(0.5 + drive.getPriority());
+                }
+                else{
+                    setActivation(drive.getActivation());
+                }
+
             } else {
                 setActivation(0);
             }
@@ -94,9 +100,19 @@ public class GetClosestJewel extends Codelet {
             double jewelX = 0;
             double jewelY = 0;
             try {
-                jewelX = closestJewel.getX1();
-                jewelY = closestJewel.getY1();
-                jewelName = closestJewel.getName();
+
+                List<Object> nextAction = (List<Object>)nextActionMO.getI();
+                if (nextAction != null && nextAction.size() > 0){
+                    SoarPickUpRemainingJewels soarPickUpRemainingJewels = (SoarPickUpRemainingJewels) nextAction.get(0);
+                    jewelX = soarPickUpRemainingJewels.x1;
+                    jewelY = soarPickUpRemainingJewels.y1;
+                    jewelName = soarPickUpRemainingJewels.jewelName;
+                }
+                else {
+                    jewelX = closestJewel.getX1();
+                    jewelY = closestJewel.getY1();
+                    jewelName = closestJewel.getName();
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

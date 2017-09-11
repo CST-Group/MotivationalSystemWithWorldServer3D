@@ -46,8 +46,8 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
         /*if (cis.getLeafletList() != null) {
 
-            double collectedNumberLeaflet = getCollectedNumberLeaflet(cis.getLeafletList());
-            double fullNumberLeaflet = getFullNumberLeaflet(cis.getLeafletList());
+            double collectedNumberLeaflet = getCollectedNumberOfJewelsInLeaflet(cis.getLeafletList());
+            double fullNumberLeaflet = getTotalNumberOfJewelsInLeaflet(cis.getLeafletList());
 
             ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
         }*/

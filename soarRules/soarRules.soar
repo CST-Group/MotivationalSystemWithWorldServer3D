@@ -1,0 +1,91 @@
+################################  CONFIGURATION ################################
+watch 5
+learn --off
+epmem --set learning off
+rl --set learning on
+watch --rl
+
+###################################  MOVE TO JEWELS  ###################################
+# This operator will make the agent move to remaining jewels
+
+sp {propose*move*jewel
+   (state <s> ^io.input-link <il>)
+   (<il> ^CREATURE <creature>)
+   (<creature> ^GOAL <goal>)
+   (<creature> ^PERCEPTION <perception>)
+   (<goal> ^DIFFJEWELS.<color> <count> > 0)
+   (<perception> ^JEWELS <jewels>)
+   (<jewels> ^THING <thing>)
+   (<thing> ^MATERIAL.TYPE <color>
+            ^NAME.VALUE <name>
+            ^POSITION.X1 <x1>
+            ^POSITION.Y1 <y1>
+            ^DISTANCE.VALUE <distance>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^command getJewel)
+   (<o> ^jewelName <name>)
+   (<o> ^x1 <x1>)
+   (<o> ^y1 <y1>)
+   (<o> ^distance <distance>)
+}
+
+sp {apply*move*jewel
+   (state <s> ^operator <o>
+    	      ^io <io>)
+   (<io> ^input-link <il>
+	     ^output-link <ol>)
+   (<o> ^command getJewel)
+   (<o> ^jewelName <name>)
+   (<o> ^x1 <x1>)
+   (<o> ^y1 <y1>)
+   (<o> ^distance <distance>)
+-->
+   (<ol> ^SoarPickUpRemainingJewels <variable>)
+   (<variable> ^jewelName <name>)
+   (<variable> ^x1 <x1>)
+   (<variable> ^y1 <y1>)
+   (<variable> ^distance <distance>)
+   (halt)
+}
+
+sp {propose*finish*goal
+   (state <s> ^io.input-link <il>)
+   (<il> ^CREATURE <creature>)
+   (<creature> ^GOAL <goal>)
+   (<creature> ^PERCEPTION <perception>)
+   (<goal> ^GOALNAME <goalName>)
+   (<goalName> ^VALUE <value>)
+   (<goal> ^DIFFJEWELS.RED <count> = 0)
+   (<goal> ^DIFFJEWELS.GREEN <count> = 0)
+   (<goal> ^DIFFJEWELS.BLUE <count> = 0)
+   (<goal> ^DIFFJEWELS.WHITE <count> = 0)
+   (<goal> ^DIFFJEWELS.YELLOW <count> = 0)
+   (<goal> ^DIFFJEWELS.MAGENTA <count> = 0)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^SoarFinishGoal <value>)
+}
+
+sp {apply*finish*goal
+   (state <s> ^operator <o>
+    	      ^io <io>)
+   (<io> ^input-link <il>
+	     ^output-link <ol>)
+   (<o> ^SoarFinishGoal <value>)
+-->
+   (<ol> ^SoarFinishGoal <value>)
+   (halt)
+}
+
+sp {move*jewel*preferences*move*jewel
+   (state <s> ^operator <o> +
+                        <o2> +)
+   (<o2> ^distance <distance2>)
+   (<o> ^distance <distance> <= <distance2>)
+-->
+   (<s> ^operator <o> > <o2>)
+}
+
+
+

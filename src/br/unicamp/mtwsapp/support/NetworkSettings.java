@@ -1,6 +1,6 @@
 package br.unicamp.mtwsapp.support;
 
-import org.numenta.nupic.network.Inference;
+import org.numenta.nupic.network.Layer;
 import org.numenta.nupic.network.Network;
 import org.numenta.nupic.network.PublisherSupplier;
 
@@ -37,6 +37,19 @@ public class NetworkSettings {
         this.setShowLog(showLog);
     }
 
+
+    public double[] getMostProbableValue(int count){
+
+        Layer<?> layer = getNetwork().lookup("Region 1").lookup("Layer 2/3");
+
+        double[] output = new double[count];
+
+        for (int i = 0; i < count ; i++) {
+            output[i] = (double) layer.getInference().getClassification("CurrentAppraisal").getMostProbableValue(1);
+        }
+
+        return output;
+    }
 
     public void computeInput(String input){
         getManual().get().onNext(input);

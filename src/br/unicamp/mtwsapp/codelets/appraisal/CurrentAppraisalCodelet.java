@@ -92,8 +92,8 @@ public class CurrentAppraisalCodelet extends AppraisalCodelet {
         getEnergyIV().setEnabled(true);
         getEnergyIV().setRange(0.000, 1000.000);
         getEnergyIV().addTerm(new Trapezoid(HUNGRY, 0, 0, 200, 400));
-        getEnergyIV().addTerm(new Trapezoid(NORMAL, 200, 400, 600, 800));
-        getEnergyIV().addTerm(new Trapezoid(SATISFIED, 600, 800, 1000, 1000));
+        getEnergyIV().addTerm(new Trapezoid(NORMAL, 300, 400, 500, 600));
+        getEnergyIV().addTerm(new Trapezoid(SATISFIED, 500, 700, 1000, 1000));
         getEngine().addInputVariable(getEnergyIV());
         
     }
@@ -115,8 +115,8 @@ public class CurrentAppraisalCodelet extends AppraisalCodelet {
         getOutputOV().setRange(0.000, 1.000);
         getOutputOV().setDefaultValue(Double.NaN);
         getOutputOV().addTerm(new Trapezoid(STATE_BAD, 0, 0, 0.4, 0.5));
-        getOutputOV().addTerm(new Trapezoid(STATE_NORMAL, 0.4, 0.5, 0.7, 0.8));
-        getOutputOV().addTerm(new Trapezoid(STATE_GOOD,  0.7, 0.8, 1.0, 1.0));
+        getOutputOV().addTerm(new Trapezoid(STATE_NORMAL, 0.4, 0.5, 0.6, 0.7));
+        getOutputOV().addTerm(new Trapezoid(STATE_GOOD,  0.6, 0.7, 1.0, 1.0));
         getEngine().addOutputVariable(getOutputOV());
     }
 

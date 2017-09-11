@@ -26,17 +26,25 @@ import java.util.stream.Collectors;
 public class ExpectationCodelet extends Codelet {
 
     public static final String OUTPUT_EXPECTATION_MEMORY = "OUTPUT_EXPECTATION_MEMORY";
-    public static final String OUTPUT_USE_FLAG_MEMORY = "OUTPUT_USE_FLAG_MEMORY";
 
     private MemoryObject inputEpisodicMemory;
     private MemoryObject outputImaginationMemory;
-    private MemoryObject outputUseFlagMemory;
 
     private HashMap<Long, Pair> inputEpisodics;
 
     private List<NetworkSettings> networks;
     private HashMap<String, List<String>> netNamesAndFields;
     private HashMap<String, Integer> netDimensions;
+
+    private AbstractObject hypoteticalSituation;
+
+    private Property propNet;
+
+    private QualityDimension qdNet;
+
+    private Property propUseFlag;
+
+    private QualityDimension qdUseFlag;
 
     private boolean init = true;
 
@@ -57,6 +65,24 @@ public class ExpectationCodelet extends Codelet {
         setNetworks(new ArrayList<>());
 
         initNetworksSetting();
+
+        setHypoteticalSituation(new AbstractObject("HypoteticalSituation"));
+
+        setPropNet(new Property("Network"));
+
+        setPropUseFlag(new Property("UseFlag"));
+
+        setQdNet(new QualityDimension("Value", null));
+
+        getPropNet().addQualityDimension(getQdNet());
+
+        setQdUseFlag(new QualityDimension("Value", false));
+
+        getPropUseFlag().addQualityDimension(getQdUseFlag());
+
+        getHypoteticalSituation().addProperty(getPropNet());
+
+        getHypoteticalSituation().addProperty(getPropUseFlag());
     }
 
     private void initNetworksSetting() {
@@ -66,9 +92,9 @@ public class ExpectationCodelet extends Codelet {
                 "int,int",
                 "C,C",
                 896,
-                "CurrentAppraisal", false));
+                "CurrentAppraisal", true));
 
-        getNetworks().add(new NetworkSettings("HungerDriveNetWork",
+        /*getNetworks().add(new NetworkSettings("HungerDriveNetWork",
                 Arrays.asList("CurrentTime", "HungerDrive"),
                 "int,float",
                 "C,C",
@@ -80,7 +106,7 @@ public class ExpectationCodelet extends Codelet {
                 "int,float",
                 "C,C",
                 1024,
-                "AmbitionDrive", false));
+                "AmbitionDrive", false));*/
 
         /*getNetworks().add(new NetworkSettings("AvoidDriveNetWork",
                 Arrays.asList("CurrentTime", "AvoidDrive"),
@@ -109,10 +135,6 @@ public class ExpectationCodelet extends Codelet {
             setOutputImaginationMemory((MemoryObject) getOutput(OUTPUT_EXPECTATION_MEMORY));
         }
 
-        if(getOutputUseFlagMemory() == null){
-            setOutputUseFlagMemory((MemoryObject)getOutput(OUTPUT_USE_FLAG_MEMORY));
-        }
-
     }
 
     @Override
@@ -127,12 +149,12 @@ public class ExpectationCodelet extends Codelet {
     @Override
     public void proc() {
 
-        getOutputUseFlagMemory().setI(false);
-
         if (!isInit()) {
             setInputEpisodics((HashMap<Long, Pair>) ((HashMap<Long, Pair>) getInputEpisodicMemory().getI()).clone());
 
             if (getInputEpisodics() != null) {
+
+                getQdUseFlag().setValue(false);
 
                 List<HashMap<String, Object>> afterList = new ArrayList<>();
 
@@ -163,25 +185,25 @@ public class ExpectationCodelet extends Codelet {
                                 networkSetting));
                     }
 
-
                     for (int i = networkSetting.getNextIndexToTrainning(); i < networkSetting.getInputs().size(); i++) {
                         networkSetting.computeInput(networkSetting.getInputs().get(i));
                     }
 
                     networkSetting.setNextIndexToTrainning(networkSetting.getInputs().size());
 
-                    if(networkSetting.isShowLog())
-                        System.out.println("Network: @NAME - Mean Error:".replace("@NAME", networkSetting.getNetworkName()) + networkSetting.getMeanError());
-
                 }
 
-                getOutputImaginationMemory().setI(getNetworks());
+                getQdNet().setValue(getNetworks());
+
+                getQdUseFlag().setValue(true);
+
+                getOutputImaginationMemory().setI(getHypoteticalSituation());
             }
         } else {
             setInit(false);
         }
 
-        getOutputUseFlagMemory().setI(true);
+
 
     }
 
@@ -309,7 +331,7 @@ public class ExpectationCodelet extends Codelet {
 
         if (networkName.equals("AppraisalNetWork")) {
             encoding = getEncodingAppraisalNetwork();
-        }  else if (networkName.equals("HungerDriveNetWork")) {
+        } else if (networkName.equals("HungerDriveNetWork")) {
             encoding = getEncodingHungerDriveNetwork();
         } else if (networkName.equals("AmbitionDriveNetWork")) {
             encoding = getEncodingAmbitionDriveNetwork();
@@ -360,7 +382,7 @@ public class ExpectationCodelet extends Codelet {
                         .add(Network.createLayer("Layer 4", p)
                                 .add(new SpatialPooler()))
                         .add(Network.createLayer("Layer 5", p)
-                          .add(sensor))
+                                .add(sensor))
                         .connect("Layer 2/3", "Layer 4")
                         .connect("Layer 4", "Layer 5"));
 
@@ -388,6 +410,8 @@ public class ExpectationCodelet extends Codelet {
 
 
         network.observe().subscribe(getSubscriber(output, net));
+
+
 
         network.start();
 
@@ -422,7 +446,11 @@ public class ExpectationCodelet extends Codelet {
                                 .get(output).get("inputValue");
                         double error = Math.abs(predictedValue - actual);
 
-                        if(networkSettings.isShowLog()) {
+                        networkSettings.setLastInputValue(actual);
+                        networkSettings.setLastPredictedValue(newPrediction);
+                        networkSettings.setTotalError(networkSettings.getTotalError() + error);
+
+                        if (networkSettings.isShowLog()) {
                             StringBuilder sb = new StringBuilder()
                                     .append("Number:" + i.getRecordNum()).append(", ")
                                     //.append("classifier input=")
@@ -431,14 +459,13 @@ public class ExpectationCodelet extends Codelet {
                                     .append("Predicted Value:" + String.format("%3.2f", predictedValue)).append(", ")
                                     .append("Error:" + String.format("%3.2f", error)).append(", ")
                                     //.append("anomaly score=")
-                                    .append("Anomaly Score:" + i.getAnomalyScore());
+                                    .append("Anomaly Score:" + i.getAnomalyScore()).append(", ")
+                                    .append("Mean Error:" + networkSettings.getMeanError());
 
                             System.out.println(sb);
                         }
 
-                        networkSettings.setLastInputValue(actual);
-                        networkSettings.setLastPredictedValue(newPrediction);
-                        networkSettings.setTotalError(networkSettings.getTotalError() + error);
+
 
                     } else {
 
@@ -614,11 +641,10 @@ public class ExpectationCodelet extends Codelet {
 
         parameters.set(Parameters.KEY.RANDOM, new FastRandom());*/
 
-
         parameters.set(Parameters.KEY.GLOBAL_INHIBITION, true);
         parameters.set(Parameters.KEY.COLUMN_DIMENSIONS, new int[]{dimension});
-        parameters.set(Parameters.KEY.CELLS_PER_COLUMN, 32);
-        parameters.set(Parameters.KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 5.0);
+        parameters.set(Parameters.KEY.CELLS_PER_COLUMN, 64);
+        parameters.set(Parameters.KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 10.0);
         parameters.set(Parameters.KEY.POTENTIAL_PCT, 0.8);
         parameters.set(Parameters.KEY.SYN_PERM_CONNECTED, 0.1);
         parameters.set(Parameters.KEY.SYN_PERM_ACTIVE_INC, 0.0001);
@@ -639,8 +665,7 @@ public class ExpectationCodelet extends Codelet {
         return parameters;
     }
 
-    public static Map<String, Class<? extends Classifier>> getInferredFieldsMap(
-            String field, Class<? extends Classifier> classifier) {
+    public static Map<String, Class<? extends Classifier>> getInferredFieldsMap(String field, Class<? extends Classifier> classifier) {
         Map<String, Class<? extends Classifier>> inferredFieldsMap = new HashMap<>();
         inferredFieldsMap.put(field, classifier);
         return inferredFieldsMap;
@@ -678,14 +703,6 @@ public class ExpectationCodelet extends Codelet {
         this.networks = networks;
     }
 
-    public MemoryObject getOutputUseFlagMemory() {
-        return outputUseFlagMemory;
-    }
-
-    public void setOutputUseFlagMemory(MemoryObject outputUseFlagMemory) {
-        this.outputUseFlagMemory = outputUseFlagMemory;
-    }
-
     public boolean isInit() {
         return init;
     }
@@ -700,5 +717,45 @@ public class ExpectationCodelet extends Codelet {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public AbstractObject getHypoteticalSituation() {
+        return hypoteticalSituation;
+    }
+
+    public void setHypoteticalSituation(AbstractObject hypoteticalSituation) {
+        this.hypoteticalSituation = hypoteticalSituation;
+    }
+
+    private Property getPropNet() {
+        return propNet;
+    }
+
+    private void setPropNet(Property propNet) {
+        this.propNet = propNet;
+    }
+
+    private QualityDimension getQdNet() {
+        return qdNet;
+    }
+
+    private void setQdNet(QualityDimension qdNet) {
+        this.qdNet = qdNet;
+    }
+
+    private Property getPropUseFlag() {
+        return propUseFlag;
+    }
+
+    private void setPropUseFlag(Property propUseFlag) {
+        this.propUseFlag = propUseFlag;
+    }
+
+    private QualityDimension getQdUseFlag() {
+        return qdUseFlag;
+    }
+
+    private void setQdUseFlag(QualityDimension qdUseFlag) {
+        this.qdUseFlag = qdUseFlag;
     }
 }

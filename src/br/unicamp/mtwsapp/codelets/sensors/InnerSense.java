@@ -3,12 +3,17 @@ package br.unicamp.mtwsapp.codelets.sensors;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
+import br.unicamp.cst.representation.owrl.AbstractObject;
+import br.unicamp.cst.representation.owrl.Property;
+import br.unicamp.cst.representation.owrl.QualityDimension;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Leaflet;
 import ws3dproxy.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,14 +23,19 @@ import java.util.List;
 public class InnerSense extends Codelet {
 
     private MemoryObject innerSenseMO;
+    private MemoryObject innerSenseAOMO;
     private Creature c;
     private CreatureInnerSense cis;
     private double agentScore;
+
+    private String[] colors;
 
     public InnerSense(String name, Creature nc) {
         setC(nc);
         this.setName(name);
         setCis(new CreatureInnerSense());
+
+        setColors(new String[]{Constants.colorRED, Constants.colorYELLOW, Constants.colorGREEN, Constants.colorWHITE, Constants.colorMAGENTA, Constants.colorBLUE});
     }
 
     @Override
@@ -33,9 +43,13 @@ public class InnerSense extends Codelet {
         if (getInnerSenseMO() == null) {
             setInnerSenseMO((MemoryObject) this.getOutput("INNER"));
         }
+
+        if (getInnerSenseAOMO() == null) {
+            setInnerSenseAOMO((MemoryObject) this.getOutput("INNER_AO"));
+        }
     }
 
-    public synchronized void proc() {
+    public void proc() {
 
         getCis().setPosition(getC().getPosition());
         getCis().setPitch(getC().getPitch());
@@ -43,12 +57,17 @@ public class InnerSense extends Codelet {
         getCis().setFuel(getC().getFuel());
         getCis().setLeafletList(getC().getLeaflets());
 
-        double collectedNumberLeaflet = getCollectedNumberLeaflet(getCis().getLeafletList());
-        double fullNumberLeaflet = getFullNumberLeaflet(getCis().getLeafletList());
+        double collectedNumberLeaflet = getCollectedNumberOfJewelsInLeaflet(getCis().getLeafletList());
 
-        getCis().setLeafletCompleteRate((collectedNumberLeaflet / fullNumberLeaflet)*100);
+        double fullNumberLeaflet = getTotalNumberOfJewelsInLeaflet(getCis().getLeafletList());
+
+        getCis().setLeafletCompleteRate((collectedNumberLeaflet / fullNumberLeaflet) * 100);
+
+        getCis().setDiffJewels(getDifferenceBetweenCollectedAndLeaflets(getCis().getLeafletList()));
 
         getInnerSenseMO().setI(getCis());
+
+        getInnerSenseAOMO().setI(innerSenseToAbstractObject(getCis()));
 
     }
 
@@ -61,6 +80,29 @@ public class InnerSense extends Codelet {
         }
     }
 
+
+    public AbstractObject innerSenseToAbstractObject(CreatureInnerSense innerSense) {
+
+        AbstractObject innerSenseAO = new AbstractObject("INNERSENSE");
+
+        innerSenseAO.addProperty(new Property("SENSE", Arrays.asList(
+                new QualityDimension("FUEL", innerSense.getFuel()),
+                new QualityDimension("LEAFLETCOMPLETERATE", innerSense.getLeafletCompleteRate()),
+                new QualityDimension("POSITION", innerSense.getPosition())
+        )));
+
+        ArrayList<QualityDimension> qdJewels = new ArrayList<>();
+
+        for (HashMap.Entry<String, Double> colorJewel : innerSense.getDiffJewels().entrySet()) {
+
+            qdJewels.add(new QualityDimension(colorJewel.getKey().toUpperCase(), colorJewel.getValue()));
+
+        }
+
+        innerSenseAO.addProperty(new Property("DIFFJEWELS", qdJewels));
+
+        return innerSenseAO;
+    }
 
     public MemoryObject getInnerSenseMO() {
         return innerSenseMO;
@@ -86,16 +128,37 @@ public class InnerSense extends Codelet {
         this.cis = cis;
     }
 
-    public double getFullNumberLeaflet(List<Leaflet> leaflets) {
 
-        ArrayList<String> colors = new ArrayList<String>();
-        colors.add(Constants.colorRED);
-        colors.add(Constants.colorYELLOW);
-        colors.add(Constants.colorGREEN);
-        colors.add(Constants.colorWHITE);
-        colors.add(Constants.colorORANGE);
-        colors.add(Constants.colorMAGENTA);
-        colors.add(Constants.colorBLUE);
+    public HashMap<String, Double> getDifferenceBetweenCollectedAndLeaflets(List<Leaflet> leaflets) {
+
+        HashMap<String, Double> diffJewels = new HashMap<>();
+        diffJewels.put(Constants.colorRED, 0d);
+        diffJewels.put(Constants.colorYELLOW, 0d);
+        diffJewels.put(Constants.colorGREEN, 0d);
+        diffJewels.put(Constants.colorWHITE, 0d);
+        diffJewels.put(Constants.colorMAGENTA, 0d);
+        diffJewels.put(Constants.colorBLUE, 0d);
+
+        for (Leaflet leaflet : leaflets) {
+            for (String color : getColors()) {
+                if (leaflet.getTotalNumberOfType(color) != -1) {
+                    int missingNumberOfType = leaflet.getMissingNumberOfType(color);
+                    if (missingNumberOfType > 0) {
+
+                        double value = leaflet.getMissingNumberOfType(color) - leaflet.getCollectedNumberOfType(color);
+
+                        diffJewels.put(color, diffJewels.get(color) + value);
+                    }
+                }
+            }
+        }
+
+        return diffJewels;
+
+    }
+
+
+    public double getTotalNumberOfJewelsInLeaflet(List<Leaflet> leaflets) {
 
         double totalJewels = 0;
 
@@ -105,7 +168,7 @@ public class InnerSense extends Codelet {
 
             int countLeaflet = 0;
 
-            for (String color : colors) {
+            for (String color : getColors()) {
                 if (leaflet.getTotalNumberOfType(color) != -1) {
                     totalJewels += leaflet.getTotalNumberOfType(color);
 
@@ -124,22 +187,13 @@ public class InnerSense extends Codelet {
         return totalJewels;
     }
 
-    public double getCollectedNumberLeaflet(List<Leaflet> leaflets) {
-
-        ArrayList<String> colors = new ArrayList<String>();
-        colors.add(Constants.colorRED);
-        colors.add(Constants.colorYELLOW);
-        colors.add(Constants.colorGREEN);
-        colors.add(Constants.colorWHITE);
-        colors.add(Constants.colorORANGE);
-        colors.add(Constants.colorMAGENTA);
-        colors.add(Constants.colorBLUE);
+    public double getCollectedNumberOfJewelsInLeaflet(List<Leaflet> leaflets) {
 
         double totalCollectedJewels = 0;
 
         for (Leaflet leaflet : leaflets) {
 
-            for (String color : colors) {
+            for (String color : getColors()) {
                 if (leaflet.getTotalNumberOfType(color) != -1)
                     totalCollectedJewels += leaflet.getCollectedNumberOfType(color);
             }
@@ -147,5 +201,21 @@ public class InnerSense extends Codelet {
         }
 
         return totalCollectedJewels;
+    }
+
+    public String[] getColors() {
+        return colors;
+    }
+
+    public void setColors(String[] colors) {
+        this.colors = colors;
+    }
+
+    public MemoryObject getInnerSenseAOMO() {
+        return innerSenseAOMO;
+    }
+
+    public void setInnerSenseAOMO(MemoryObject innerSenseAOMO) {
+        this.innerSenseAOMO = innerSenseAOMO;
     }
 }
