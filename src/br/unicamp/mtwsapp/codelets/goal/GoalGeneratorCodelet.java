@@ -24,7 +24,12 @@ public class GoalGeneratorCodelet extends GoalCodelet{
         if(hypotheticalSituation != null) {
             AbstractObject goalAO = new AbstractObject("GOAL");
             goalAO.addProperty(new Property("GOALNAME", Arrays.asList(new QualityDimension("VALUE", "PickUpRemainingJewels"))));
-            goalAO.addProperty(hypotheticalSituation.getProperties().stream().filter(property -> property.getName().equals("DIFFJEWELS")).findFirst().get());
+
+            hypotheticalSituation.getProperties().stream().filter(property -> property.getName().equals("LEAFLET")).forEach(h -> {
+                goalAO.addProperty(h);
+            });
+
+            //goalAO.addProperty(hypotheticalSituation.getProperties().stream().filter(property -> property.getName().equals("DIFFJEWELS")).findFirst().get());
             return new Goal("PickUpRemainingJewels", goalAO);
         } else{
             return null;

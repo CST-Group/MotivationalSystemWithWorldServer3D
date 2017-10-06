@@ -34,13 +34,10 @@ public class Vision extends Codelet {
 
     @Override
     public void proc() {
-
         getC().updateState();
         List<Thing> lt = Collections.synchronizedList(new ArrayList<>());
         lt.addAll(getC().getThingsInVision());
         getVisionMO().setI(lt);
-
-
     }
 
     @Override

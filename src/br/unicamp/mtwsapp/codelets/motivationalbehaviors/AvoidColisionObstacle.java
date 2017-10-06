@@ -30,7 +30,6 @@ public class AvoidColisionObstacle extends Codelet {
     private MemoryObject drivesMO;
     private MemoryObject legsMO;
     private MemoryObject handsMO;
-    private MemoryObject knownJewelsMO;
 
     private Thing closestObstacle;
     private Creature creature;
@@ -55,8 +54,6 @@ public class AvoidColisionObstacle extends Codelet {
         if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_AVOID_DANGER");
 
-        if (knownJewelsMO == null)
-            knownJewelsMO = (MemoryObject) this.getInput("KNOWN_JEWELS");
 
 
     }
@@ -104,8 +101,6 @@ public class AvoidColisionObstacle extends Codelet {
             } else {
 
                 if (closestObstacle.getName().contains("Jewel")) {
-                    List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewelsMO.getI());
-
                     boolean exist = false;
 
                     for (Leaflet leaflet : getCreature().getLeaflets()) {

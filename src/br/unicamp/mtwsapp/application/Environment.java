@@ -26,18 +26,38 @@ public class Environment {
 
             Random rand = new Random();
 
-            World.createFood(rand.nextInt(2), rand.nextInt(width), rand.nextInt(height));
+
+
+            /*World.createFood(rand.nextInt(2), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));*/
+
+
+            World.createJewel(rand.nextInt(6), 500, 450);
+            World.createJewel(rand.nextInt(6), 500, 440);
+            World.createJewel(rand.nextInt(6), 500, 430);
+            World.createJewel(rand.nextInt(6), 500, 420);
+            World.createJewel(rand.nextInt(6), 500, 400);
+            World.createJewel(rand.nextInt(6), 500, 390);
+            World.createJewel(rand.nextInt(6), 500, 380);
+            World.createJewel(rand.nextInt(6), 500, 370);
+            World.createJewel(rand.nextInt(6), 500, 360);
+
+
+
+            //World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
 
 
             //World.createJewel(5, rand.nextInt(width), rand.nextInt(height));
 
-            int x = rand.nextInt(width);
+            /*int x = rand.nextInt(width);
             int y = rand.nextInt(height);
             World.createBrick(4, x, y, x + 40, y + 40);
 
@@ -51,7 +71,7 @@ public class Environment {
             
             x = rand.nextInt(width);
             y = rand.nextInt(height);
-            World.createBrick(4, x, y, x + 40, y + 40);
+            World.createBrick(4, x, y, x + 40, y + 40);*/
             
             //x = rand.nextInt(width);
             //y = rand.nextInt(height);

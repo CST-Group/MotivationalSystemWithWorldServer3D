@@ -1,0 +1,212 @@
+################################  CONFIGURATION ################################
+watch 5
+
+
+###################################  PROPOSE RULES  ###################################
+
+sp {propose*init
+    (state <s> ^superstate nil
+               -^name)
+-->
+    (<s> ^operator <op> + =)
+    (<op> ^name initSmem)
+}
+
+sp {apply*init
+   (state <s> ^operator.name initSmem
+              ^smem.command <cmd>)
+-->
+   (<s> ^name initSmem)
+   (<cmd> ^plans <a> <b> <c>)
+
+   (<a> ^index 0.0)
+   (<a> ^counter 0)
+   (<a> ^jewels <jewels1>)
+   (<a> ^jewelsinleaflet <jewelsInLeaflet1>)
+
+
+   (<b> ^index 1.0)
+   (<b> ^counter 0)
+   (<b> ^jewels <jewels2>)
+   (<b> ^jewelsinleaflet <jewelsInLeaflet2>)
+
+   (<c> ^index 2.0)
+   (<c> ^counter 0)
+   (<c> ^jewels <jewels3>)
+   (<c> ^jewelsinleaflet <jewelsInLeaflet3>)
+
+}
+
+sp {propose*initPlans
+    (state <s> ^name initSmem
+               -^name initPlans)
+-->
+    (<s> ^operator <op> + =)
+    (<op> ^name initPlans)
+}
+
+sp {apply*initPlans
+   (state <s> ^operator.name initPlans
+              ^smem.command <cmd>
+              ^io.input-link <il>)
+   (<il> ^CREATURE <creature>)
+   (<creature> ^GOAL <goal>)
+   (<creature> ^PERCEPTION <perception>)
+   (<goal> ^LEAFLET <leaflet>)
+   (<leaflet> ^JEWELSINLEAFLET.RED <red>)
+   (<leaflet> ^JEWELSINLEAFLET.GREEN <green>)
+   (<leaflet> ^JEWELSINLEAFLET.BLUE <blue>)
+   (<leaflet> ^JEWELSINLEAFLET.YELLOW <yellow>)
+   (<leaflet> ^JEWELSINLEAFLET.MAGENTA <magenta>)
+   (<leaflet> ^JEWELSINLEAFLET.WHITE <white>)
+   (<leaflet> ^INDEX <index>)
+   (<cmd> ^plans <plans>)
+   (<plans> ^index <index>)
+   (<plans> ^jewelsinleaflet <jewelinleaflet>)
+-->
+   (<s> ^name initPlans)
+   (<jewelinleaflet> ^RED <red>)
+   (<jewelinleaflet> ^GREEN <green>)
+   (<jewelinleaflet> ^BLUE <blue>)
+   (<jewelinleaflet> ^YELLOW <yellow>)
+   (<jewelinleaflet> ^MAGENTA <magenta>)
+   (<jewelinleaflet> ^WHITE <white>)
+}
+
+sp {propose*move*jewel
+   (state <s> ^io.input-link <il>
+              ^smem.command <cmd>)
+   (<il> ^CREATURE <creature>)
+   (<creature> ^GOAL <goal>)
+   (<creature> ^PERCEPTION <perception>)
+   (<goal> ^LEAFLET <leaflet>)
+   (<leaflet>   ^JEWELSINLEAFLET.<color> > 0
+                ^SCORE <score>
+                ^INDEX <index>)
+   (<perception> ^JEWELS <jewels>)
+   (<jewels> ^THING <thing>)
+   (<thing> ^MATERIAL.TYPE <color>
+            ^NAME.VALUE <name>
+            ^POSITION.X1 <x1>
+            ^POSITION.Y1 <y1>
+            ^DISTANCE.VALUE <distance>)
+   (<cmd> ^plans <plans>)
+   (<plans> ^jewels <jewelPlan>)
+   (<plans> ^jewelsinleaflet <jewelinleaflet>)
+   (<jewelinleaflet> ^<color> <num1> > 0)
+   -(<jewelPlan> ^SoarJewel <jewel>)
+   -(<jewel> ^name <name>)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name getJewel)
+   (<o> ^color <color>)
+   (<o> ^jewelName <name>)
+   (<o> ^x1 <x1>)
+   (<o> ^y1 <y1>)
+   (<o> ^distance <distance>)
+   (<o> ^score <score>)
+   (<o> ^index <index>)
+}
+
+sp {apply*move*jewel
+   (state <s> ^operator <o>
+              ^io <io>
+              ^smem.command <cmd>)
+   (<io> ^input-link <il>
+        ^output-link <ol>)
+   (<o> ^name getJewel)
+   (<o> ^jewelName <name>)
+   (<o> ^x1 <x1>)
+   (<o> ^y1 <y1>)
+   (<o> ^color <color>)
+   (<o> ^distance <distance>)
+   (<o> ^score <score>)
+   (<o> ^index <index>)
+   (<cmd> ^plans <id>)
+   (<id> ^index <index>)
+   (<id> ^counter <num>)
+   (<id> ^jewels <jewels>)
+   (<id> ^jewelsinleaflet <jewelinleaflet>)
+   (<jewelinleaflet> ^<color> <num1> > 0)
+-->
+   (<id> ^counter <num> -
+                         (+ <num> 1))
+   (<jewelinleaflet> ^<color> <num1> -
+                         (- <num1> 1))
+   (<jewels>  ^SoarJewel <newJewel>)
+   (<newJewel>  ^name <name>)
+   (<newJewel>  ^color <color>)
+   (<newJewel>  ^x1 <x1>)
+   (<newJewel>  ^y1 <y1>)
+   (<newJewel>  ^distance <distance>)
+   (<newJewel>  ^score <score>)
+}
+
+sp {monitoring*desire*state
+   (state <s> ^smem.command <cmd>)
+   (<cmd> ^plans <plans>)
+   (<plans> ^index <index>)
+   (<plans> ^counter 3)
+-->
+   (<s> ^operator <o> +)
+   (<o> ^name desireState)
+   (<o> ^planIndex <index>)
+}
+
+sp {apply*desire*state
+   (state <s> ^operator <o>
+              ^smem.command <cmd>
+              ^io <io>)
+   (<io> ^input-link <il>
+         ^output-link <ol>)
+   (<o> ^name desireState)
+   (<o> ^planIndex <index>)
+   (<cmd> ^plans <plans>)
+   (<plans> ^index <index>)
+   (<plans> ^jewels <jewels>)
+-->
+   (<ol> ^SoarPlan <goal>)
+   (<goal> ^ArraySoarJewels <jewels>)
+
+   (halt)
+}
+
+###################################  PREFERENCES RULES  ###################################
+
+sp {move*jewel*preferences*monitoring*desire*state
+   (state <s>  ^operator <o> +
+                        <o2> +)
+   (<o> ^name desireState)
+   (<o2> ^name getJewel)
+-->
+   (<s> ^operator <o> > <o2>)
+}
+
+sp {move*jewel*preferences*move*jewel
+   (state <s>  ^smem.command <cmd>
+               ^operator <o> +
+                        <o2> +)
+
+   (<o2> ^score <score2>)
+   (<o> ^score <score> > <score2>)
+-->
+   (<s> ^operator <o> > <o2> =)
+}
+
+sp {move*jewel*preferences*initSmem
+   (state <s> ^operator <o> +
+                       <o2> +)
+   (<o> ^name initSmem)
+   (<o2> ^name getJewel)
+-->
+   (<s> ^operator <o> > <o2>)
+}
+
+sp {move*jewel*preferences*initPlans
+   (state <s> ^operator <o> +
+                       <o2> +)
+   (<o> ^name initPlans)
+   (<o2> ^name getJewel)
+-->
+   (<s> ^operator <o> > <o2>)
+}

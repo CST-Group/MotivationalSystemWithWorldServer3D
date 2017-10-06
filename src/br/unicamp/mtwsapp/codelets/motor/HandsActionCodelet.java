@@ -65,7 +65,7 @@ public class HandsActionCodelet extends Codelet {
         if (getBehaviorsMC().getI() != null) {
                 String command = (String) getBehaviorsMC().getI();
 
-                if (!command.equals("") && (!command.equals(getPreviousHandsAction()))) {
+                if (!command.equals("")) {
                     JSONObject jsonAction;
                     try {
                         jsonAction = new JSONObject(command);
@@ -73,7 +73,7 @@ public class HandsActionCodelet extends Codelet {
                             String action = jsonAction.getString("ACTION");
                             String objectName = jsonAction.getString("OBJECT");
                             if (action.equals("PICKUP")) {
-                                if (!getPreviousHandsAction().contains(action)) {
+
                                     try {
                                         getC().putInSack(objectName);
                                         getC().rotate(3);
@@ -81,10 +81,10 @@ public class HandsActionCodelet extends Codelet {
                                         e.printStackTrace();
                                     }
                                     getLog().info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
-                                }
+
                             }
                             if (action.equals("EATIT")) {
-                                if (!getPreviousHandsAction().contains(action)) {
+
                                     try {
                                         getC().eatIt(objectName);
                                         getC().rotate(3);
@@ -92,17 +92,17 @@ public class HandsActionCodelet extends Codelet {
 
                                     }
                                     getLog().info("Sending EAT command to agent:****** " + objectName + "**********");
-                                }
+
                             }
                             if (action.equals("BURY")) {
-                                if (!getPreviousHandsAction().contains(action)) {
+
                                     try {
+
                                         getC().hideIt(objectName);
 
                                         List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
 
                                         List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
-                                        //Thing closestObstacle = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList()).get(0);
 
                                         if(thingsA.size() > 0) {
                                             Thing closestObstacle = thingsA.get(0);
@@ -128,14 +128,16 @@ public class HandsActionCodelet extends Codelet {
                                     }
 
                                     getLog().info("Sending BURY command to agent:****** " + objectName + "**********");
-                                }
+
                             }
                             if (action.equals("UNEARTH")) {
-                                if (!getPreviousHandsAction().contains(action)) {
+
                                     try {
 
                                         getC().unhideIt(objectName);
+
                                         getC().eatIt(objectName);
+
                                         getC().rotate(3);
 
                                     } catch (CommandExecException e) {
@@ -150,7 +152,7 @@ public class HandsActionCodelet extends Codelet {
                                         }
                                     }
                                     getLog().info("Sending UNEARTH command to agent:****** " + objectName + "**********");
-                                }
+
                             }
                         }
                     } catch (JSONException e) {

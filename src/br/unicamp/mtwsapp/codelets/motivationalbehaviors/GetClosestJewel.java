@@ -11,16 +11,21 @@ import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.soarplanning.SoarPickUpRemainingJewels;
+import br.unicamp.mtwsapp.codelets.soarplanning.PlanSelectionCodelet;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanningCodelet;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
 /**
@@ -31,35 +36,37 @@ public class GetClosestJewel extends Codelet {
     private MemoryObject closestJewelMO;
     private MemoryObject innerSenseMO;
     private MemoryObject drivesMO;
-    private MemoryObject nextActionMO;
+    private MemoryObject planSelectedMO;
 
     private int reachDistance;
     private MemoryObject handsMO;
-    Thing closestJewel;
-    CreatureInnerSense cis;
+    private Thing closestJewel;
+    private CreatureInnerSense cis;
+    private Creature creature;
 
-    public GetClosestJewel(String name, int reachDistance) {
+    public GetClosestJewel(String name, int reachDistance, Creature creature) {
         this.setName(name);
-        this.reachDistance = reachDistance;
+        this.setReachDistance(reachDistance);
+        this.setCreature(creature);
     }
 
     @Override
     public void accessMemoryObjects() {
-        if (drivesMO == null)
-            drivesMO = (MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        if (getDrivesMO() == null)
+            setDrivesMO((MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY));
 
-        if (closestJewelMO == null)
-            closestJewelMO = (MemoryObject) this.getInput("CLOSEST_JEWEL");
+        if (getClosestJewelMO() == null)
+            setClosestJewelMO((MemoryObject) this.getInput("CLOSEST_JEWEL"));
 
-        if (handsMO == null)
-            handsMO = (MemoryObject) this.getOutput("HANDS_GET_JEWEL");
+        if (getHandsMO() == null)
+            setHandsMO((MemoryObject) this.getOutput("HANDS_GET_JEWEL"));
 
-        if(innerSenseMO == null){
-            innerSenseMO = (MemoryObject) this.getInput("INNER");
+        if (getInnerSenseMO() == null) {
+            setInnerSenseMO((MemoryObject) this.getInput("INNER"));
         }
 
-        if(nextActionMO == null){
-            nextActionMO = (MemoryObject) this.getInput(SoarPlanningCodelet.OUTPUT_COMMAND_MO);
+        if (planSelectedMO == null) {
+            planSelectedMO = (MemoryObject) this.getInput(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO);
         }
     }
 
@@ -67,15 +74,14 @@ public class GetClosestJewel extends Codelet {
     @Override
     public void calculateActivation() {
 
-        Drive drive = (Drive) drivesMO.getI();
+        Drive drive = (Drive) getDrivesMO().getI();
 
         try {
             if (drive != null) {
-                List<Object> nextAction = (List<Object>)nextActionMO.getI();
-                if (nextAction != null && nextAction.size() > 0){
+                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
+                if (soarPlan != null) {
                     setActivation(0.5 + drive.getPriority());
-                }
-                else{
+                } else {
                     setActivation(drive.getActivation());
                 }
 
@@ -91,35 +97,40 @@ public class GetClosestJewel extends Codelet {
     @Override
     public synchronized void proc() {
         String jewelName = "";
-        closestJewel = (Thing) closestJewelMO.getI();
-        cis = (CreatureInnerSense) innerSenseMO.getI();
-        //Find distance between closest apple and self
-        //If closer than reachDistance, eat the apple
+        setClosestJewel((Thing) getClosestJewelMO().getI());
+        setCis((CreatureInnerSense) getInnerSenseMO().getI());
 
-        if (closestJewel != null) {
-            double jewelX = 0;
-            double jewelY = 0;
+        double jewelX = 0;
+        double jewelY = 0;
+
+        if (getClosestJewel() != null) {
             try {
+                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
+                if (soarPlan != null) {
 
-                List<Object> nextAction = (List<Object>)nextActionMO.getI();
-                if (nextAction != null && nextAction.size() > 0){
-                    SoarPickUpRemainingJewels soarPickUpRemainingJewels = (SoarPickUpRemainingJewels) nextAction.get(0);
-                    jewelX = soarPickUpRemainingJewels.x1;
-                    jewelY = soarPickUpRemainingJewels.y1;
-                    jewelName = soarPickUpRemainingJewels.jewelName;
-                }
-                else {
-                    jewelX = closestJewel.getX1();
-                    jewelY = closestJewel.getY1();
-                    jewelName = closestJewel.getName();
+                    for (SoarJewel soarJewel : soarPlan.getSoarJewels()) {
+                        CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
+                        Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
+
+                        if (first.isPresent()) {
+                            jewelX = soarJewel.getX1();
+                            jewelY = soarJewel.getY1();
+                            jewelName = soarJewel.getName();
+                            break;
+                        }
+                    }
+                } else {
+                    jewelX = getClosestJewel().getX1();
+                    jewelY = getClosestJewel().getY1();
+                    jewelName = getClosestJewel().getName();
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            double selfX = cis.getPosition().getX();
-            double selfY = cis.getPosition().getY();
+            double selfX = getCis().getPosition().getX();
+            double selfY = getCis().getPosition().getY();
 
             Point2D pApple = new Point();
             pApple.setLocation(jewelX, jewelY);
@@ -130,15 +141,15 @@ public class GetClosestJewel extends Codelet {
             double distance = pSelf.distance(pApple);
             JSONObject message = new JSONObject();
             try {
-                if (distance < reachDistance) { //eat it	
+                if (distance < getReachDistance()) { //eat it
                     message.put("OBJECT", jewelName);
                     message.put("ACTION", "PICKUP");
-                    handsMO.setEvaluation(getActivation());
-                    handsMO.setI(message.toString());
+                    getHandsMO().setEvaluation(getActivation());
+                    getHandsMO().setI(message.toString());
 
                 } else {
-                    handsMO.setEvaluation(getActivation());
-                    handsMO.setI("");    //nothing
+                    getHandsMO().setEvaluation(getActivation());
+                    getHandsMO().setI("");    //nothing
                 }
 
             } catch (JSONException e) {
@@ -146,8 +157,81 @@ public class GetClosestJewel extends Codelet {
                 e.printStackTrace();
             }
         } else {
-            handsMO.setEvaluation(getActivation());
-            handsMO.setI("");    //nothing
+            getHandsMO().setEvaluation(getActivation());
+            getHandsMO().setI("");    //nothing
         }
+    }
+
+    public double calculateDistanceToJewel(SoarJewel soarJewel, Creature creature) {
+
+        double distance = Math.sqrt(Math.pow((creature.getPosition().getX() - soarJewel.getX1()), 2) +
+                Math.pow((creature.getPosition().getY() - soarJewel.getY1()), 2));
+
+        return distance;
+
+    }
+
+    public Creature getCreature() {
+        return creature;
+    }
+
+    public void setCreature(Creature creature) {
+        this.creature = creature;
+    }
+
+    public MemoryObject getClosestJewelMO() {
+        return closestJewelMO;
+    }
+
+    public void setClosestJewelMO(MemoryObject closestJewelMO) {
+        this.closestJewelMO = closestJewelMO;
+    }
+
+    public MemoryObject getInnerSenseMO() {
+        return innerSenseMO;
+    }
+
+    public void setInnerSenseMO(MemoryObject innerSenseMO) {
+        this.innerSenseMO = innerSenseMO;
+    }
+
+    public MemoryObject getDrivesMO() {
+        return drivesMO;
+    }
+
+    public void setDrivesMO(MemoryObject drivesMO) {
+        this.drivesMO = drivesMO;
+    }
+
+    public int getReachDistance() {
+        return reachDistance;
+    }
+
+    public void setReachDistance(int reachDistance) {
+        this.reachDistance = reachDistance;
+    }
+
+    public MemoryObject getHandsMO() {
+        return handsMO;
+    }
+
+    public void setHandsMO(MemoryObject handsMO) {
+        this.handsMO = handsMO;
+    }
+
+    public Thing getClosestJewel() {
+        return closestJewel;
+    }
+
+    public void setClosestJewel(Thing closestJewel) {
+        this.closestJewel = closestJewel;
+    }
+
+    public CreatureInnerSense getCis() {
+        return cis;
+    }
+
+    public void setCis(CreatureInnerSense cis) {
+        this.cis = cis;
     }
 }

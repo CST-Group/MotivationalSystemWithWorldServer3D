@@ -49,35 +49,6 @@ sp {apply*move*jewel
    (halt)
 }
 
-sp {propose*finish*goal
-   (state <s> ^io.input-link <il>)
-   (<il> ^CREATURE <creature>)
-   (<creature> ^GOAL <goal>)
-   (<creature> ^PERCEPTION <perception>)
-   (<goal> ^GOALNAME <goalName>)
-   (<goalName> ^VALUE <value>)
-   (<goal> ^DIFFJEWELS.RED <count> = 0)
-   (<goal> ^DIFFJEWELS.GREEN <count> = 0)
-   (<goal> ^DIFFJEWELS.BLUE <count> = 0)
-   (<goal> ^DIFFJEWELS.WHITE <count> = 0)
-   (<goal> ^DIFFJEWELS.YELLOW <count> = 0)
-   (<goal> ^DIFFJEWELS.MAGENTA <count> = 0)
--->
-   (<s> ^operator <o> +)
-   (<o> ^SoarFinishGoal <value>)
-}
-
-sp {apply*finish*goal
-   (state <s> ^operator <o>
-    	      ^io <io>)
-   (<io> ^input-link <il>
-	     ^output-link <ol>)
-   (<o> ^SoarFinishGoal <value>)
--->
-   (<ol> ^SoarFinishGoal <value>)
-   (halt)
-}
-
 sp {move*jewel*preferences*move*jewel
    (state <s> ^operator <o> +
                         <o2> +)

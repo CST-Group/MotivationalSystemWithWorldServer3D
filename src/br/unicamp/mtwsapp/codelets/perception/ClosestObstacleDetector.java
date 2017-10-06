@@ -7,6 +7,7 @@ package br.unicamp.mtwsapp.codelets.perception;
 
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,11 +17,10 @@ import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
 /**
- *
  * @author Du
  */
 public class ClosestObstacleDetector extends Codelet {
-     private MemoryObject visionMO;
+    private MemoryObject visionMO;
     private MemoryObject closestObstacleMO;
     private MemoryObject innerSenseMO;
 
@@ -36,55 +36,36 @@ public class ClosestObstacleDetector extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if(getVisionMO() == null)
+        if (getVisionMO() == null)
             this.setVisionMO((MemoryObject) this.getInput("VISION"));
 
-        if(getInnerSenseMO() == null)
+        if (getInnerSenseMO() == null)
             this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
 
-        if(getClosestObstacleMO() == null)
+        if (getClosestObstacleMO() == null)
             this.setClosestObstacleMO((MemoryObject) this.getOutput("CLOSEST_OBSTACLE"));
     }
 
     @Override
     public synchronized void proc() {
-        Thing closest_obstacle = null;
         setKnown(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
-        //closestObstacleMO.setI(closest_obstacle);
-        
+
         synchronized (getKnown()) {
             if (!getKnown().isEmpty()) {
-                //Iterate over objects in vision, looking for the closest apple
+
                 CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
                 for (Thing t : myknown) {
 
-                    String objectName = t.getName();
+                    double Dnew = getCreature().calculateDistanceTo(t);
 
-                    if(objectName.contains("Brick")) {
-                        if (isNear(t, getReachDistance()) != null) {
-                            closest_obstacle = isNear(t, getReachDistance());
-                        }
+                    if (Dnew <= getReachDistance()) {
+                        getClosestObstacleMO().setI(t);
+                        break;
                     }
-                    else{
-                        if (isNear(t, 65) != null) {
-                            closest_obstacle = isNear(t, 65);
-                        }
-                    }
+
                 }
-
-                if (closest_obstacle != null) {
-                    if (getClosestObstacleMO().getI() == null || !getClosestObstacleMO().getI().equals(closest_obstacle)) {
-                        getClosestObstacleMO().setI(closest_obstacle);
-                    }
-
-                } else {
-                    
-                    closest_obstacle = null;
-                    getClosestObstacleMO().setI(closest_obstacle);
-                }
-            } else { 
-                closest_obstacle = null;
-                getClosestObstacleMO().setI(closest_obstacle);
+            } else {
+                getClosestObstacleMO().setI(null);
             }
         }
     }//end proc

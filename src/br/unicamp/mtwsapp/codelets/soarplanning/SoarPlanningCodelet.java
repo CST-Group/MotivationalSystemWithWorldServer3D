@@ -17,7 +17,6 @@ import ws3dproxy.model.Thing;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -39,6 +38,8 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     private MemoryObject outputCommandMO;
 
+    private MemoryObject outputCurrentSoarPlanMO;
+
     private MemoryObject inputCurrentAppraisalMO;
 
     private MemoryObject inputFoodsMO;
@@ -50,6 +51,8 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
     private Creature creature;
 
     private boolean init = false;
+
+    public static final String OUTPUT_CURRENT_SOAR_PLAN_MO = "OUTPUT_CURRENT_SOAR_PLAN_MO";
 
     public static final String OUTPUT_COMMAND_MO = "OUTPUT_COMMAND_MO";
 
@@ -65,11 +68,11 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     public SoarPlanningCodelet(String id, String pathToCommands, String agentName, File productionPath, Boolean startSOARDebugger, Creature creature) {
 
-        this.setId(id);
+        setId(id);
         setName(id);
-        this.setAgentName(agentName);
-        this.setProductionPath(productionPath);
-        this.setStartSOARDebugger(startSOARDebugger);
+        setAgentName(agentName);
+        setProductionPath(productionPath);
+        setStartSOARDebugger(startSOARDebugger);
 
         setPathToCommands(pathToCommands);
         initSoarPlugin(agentName, productionPath, startSOARDebugger);
@@ -81,9 +84,12 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
     @Override
     public void accessMemoryObjects() {
 
+        if (getOutputCurrentSoarPlanMO() == null) {
+            setOutputCurrentSoarPlanMO((MemoryObject) getOutput(OUTPUT_CURRENT_SOAR_PLAN_MO));
+        }
+
         if (getOutputCommandMO() == null) {
             setOutputCommandMO((MemoryObject) getOutput(OUTPUT_COMMAND_MO));
-            getOutputCommandMO().setI(new ArrayList<Object>());
         }
 
         if (getInputFoodsMO() == null) {
@@ -112,31 +118,43 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     @Override
     public void proc() {
+        if (isInit()) {
 
-        if (init) {
-            List<Thing> jewelThings = new CopyOnWriteArrayList(((List<Thing>) getInputJewelsMO().getI()));
-            List<Thing> foodThings = new CopyOnWriteArrayList((List<Thing>) getInputFoodsMO().getI());
-            Goal goal = (Goal) getInputGoalMO().getI();
+            processDataToAbstractObject();
 
-            if (jewelThings != null && foodThings != null && goal != null) {
+            if(getDebugState() == 0)
+                getJsoar().step();
 
-                AbstractObject goalAO = goal.getGoalAbstractObjects();
+            ArrayList<Object> commandList = getOutputInObject(getPathToCommands());
 
-                AbstractObject il = processCreatureEntities(jewelThings, foodThings, goalAO);
-
-                setInputLink(il);
-
-                jsoar.runSOAR();
-
-                ArrayList<Object> commandList = getCommandsOWRL(getPathToCommands());
-
+            if(commandList != null) {
                 getOutputCommandMO().setI(commandList);
-
-                jsoar.resetSOAR();
+                getOutputCurrentSoarPlanMO().setI(getOperatorsPathList());
             }
+
         } else {
-            init = true;
+            setInit(true);
         }
+    }
+
+
+    public void processDataToAbstractObject() {
+
+        AbstractObject il = null;
+
+        List<Thing> jewelThings = new CopyOnWriteArrayList(((List<Thing>) getInputJewelsMO().getI()));
+        List<Thing> foodThings = new CopyOnWriteArrayList((List<Thing>) getInputFoodsMO().getI());
+        Goal goal = (Goal) getInputGoalMO().getI();
+
+        if (jewelThings != null && foodThings != null && goal != null) {
+
+            AbstractObject goalAO = goal.getGoalAbstractObjects();
+
+            il = processCreatureEntities(jewelThings, foodThings, goalAO);
+
+            setInputLinkAO(il);
+        }
+
     }
 
 
@@ -154,10 +172,10 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
             perceptionAO.addCompositePart(jewelsAO);
         }
 
-        if (foodThings != null) {
+        /*if (foodThings != null) {
             foodsAO = thingsToAbstractObject(foodThings, "FOODS");
             perceptionAO.addCompositePart(foodsAO);
-        }
+        }*/
 
         creatureAO.addCompositePart(perceptionAO);
 
@@ -197,19 +215,19 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
         Property position = new Property("POSITION");
         position.addQualityDimension(new QualityDimension("X1", thing.getX1()));
-        position.addQualityDimension(new QualityDimension("X2", thing.getX2()));
+        //position.addQualityDimension(new QualityDimension("X2", thing.getX2()));
         position.addQualityDimension(new QualityDimension("Y1", thing.getY1()));
-        position.addQualityDimension(new QualityDimension("Y2", thing.getY1()));
+        //position.addQualityDimension(new QualityDimension("Y2", thing.getY1()));
         abs.addProperty(position);
 
         Property distance = new Property("DISTANCE");
         distance.addQualityDimension(new QualityDimension("VALUE", creature.calculateDistanceTo(thing)));
         abs.addProperty(distance);
 
-        Property size = new Property("SIZE");
-        size.addQualityDimension(new QualityDimension("WIDTH", thing.getWidth()));
-        size.addQualityDimension(new QualityDimension("HEIGHT", thing.getHeight()));
-        abs.addProperty(size);
+        //Property size = new Property("SIZE");
+        //size.addQualityDimension(new QualityDimension("WIDTH", thing.getWidth()));
+        //size.addQualityDimension(new QualityDimension("HEIGHT", thing.getHeight()));
+        //abs.addProperty(size);
 
         Property color = new Property("MATERIAL");
         color.addQualityDimension(new QualityDimension("TYPE", thing.getMaterial().getColorName().toUpperCase()));
@@ -305,5 +323,21 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     public void setCreature(Creature creature) {
         this.creature = creature;
+    }
+
+    public boolean isInit() {
+        return init;
+    }
+
+    public void setInit(boolean init) {
+        this.init = init;
+    }
+
+    public MemoryObject getOutputCurrentSoarPlanMO() {
+        return outputCurrentSoarPlanMO;
+    }
+
+    public void setOutputCurrentSoarPlanMO(MemoryObject outputCurrentSoarPlanMO) {
+        this.outputCurrentSoarPlanMO = outputCurrentSoarPlanMO;
     }
 }

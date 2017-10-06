@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import ws3dproxy.model.Leaflet;
+import ws3dproxy.model.Thing;
 import ws3dproxy.model.WorldPoint;
 
 /**
@@ -19,7 +20,8 @@ public class CreatureInnerSense {
     private List<Leaflet> leafletList;
     private double score;
     private double leafletCompleteRate;
-    private HashMap<String, Double> diffJewels;
+    private HashMap<String,Double> diffJewels;
+    private List<Thing> thingsInWorld;
     
     public String toString() {
         if (getPosition() != null)
@@ -86,12 +88,20 @@ public class CreatureInnerSense {
         this.leafletCompleteRate = leafletCompleteRate;
     }
 
+    public void setDiffJewels(HashMap<String,Double> diffJewels) {
+        this.diffJewels = diffJewels;
+    }
+
     public HashMap<String, Double> getDiffJewels() {
         return diffJewels;
     }
 
-    public void setDiffJewels(HashMap<String, Double> diffJewels) {
-        this.diffJewels = diffJewels;
+    public List<Thing> getThingsInWorld() {
+        return thingsInWorld;
+    }
+
+    public void setThingsInWorld(List<Thing> thingsInWorld) {
+        this.thingsInWorld = thingsInWorld;
     }
 }
 
