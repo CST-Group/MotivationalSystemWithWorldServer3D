@@ -58,6 +58,8 @@ public class InnerSense extends Codelet {
         getCis().setFuel(getC().getFuel());
         getCis().setLeafletList(getC().getLeaflets());
         getCis().setScore(getC().s.score);
+        getCis().setDeliverySpotPosition(World.getDeliverySpot());
+
         try {
             getCis().setThingsInWorld(World.getWorldEntities());
         } catch (CommandExecException e) {

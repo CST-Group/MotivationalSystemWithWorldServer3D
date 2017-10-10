@@ -3,11 +3,13 @@ package br.unicamp.mtwsapp.codelets.motor;
 
 import br.unicamp.cst.core.entities.MemoryContainer;
 import br.unicamp.cst.core.entities.MemoryObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import br.unicamp.cst.core.entities.Codelet;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -27,7 +29,10 @@ public class HandsActionCodelet extends Codelet {
     private MemoryContainer behaviorsMC;
     private MemoryObject hiddenApplesMO;
     private MemoryObject visionMO;
+    private MemoryObject jewelsCollectedMO;
 
+
+    private List<String> jewelsCollected;
     private String previousHandsAction = "";
     private Creature c;
     private Random r = new Random();
@@ -36,6 +41,7 @@ public class HandsActionCodelet extends Codelet {
     public HandsActionCodelet(String name, Creature nc) {
         setC(nc);
         this.setName(name);
+        setJewelsCollected(new ArrayList<>());
     }
 
     public static Logger getLog() {
@@ -58,110 +64,135 @@ public class HandsActionCodelet extends Codelet {
             setVisionMO((MemoryObject) this.getInput("VISION"));
 
 
+        if (getJewelsCollectedMO() == null)
+            setJewelsCollectedMO((MemoryObject) this.getOutput("JEWELS_COLLECTED"));
+
+
     }
 
     public void proc() {
 
         if (getBehaviorsMC().getI() != null) {
-                String command = (String) getBehaviorsMC().getI();
+            String command = (String) getBehaviorsMC().getI();
+            if (!command.equals("") && !command.equals(getPreviousHandsAction())) {
+                JSONObject jsonAction;
+                try {
+                    jsonAction = new JSONObject(command);
+                    if (jsonAction.has("ACTION") && jsonAction.has("OBJECT")) {
+                        String action = jsonAction.getString("ACTION");
+                        String objectName = jsonAction.getString("OBJECT");
+                        if (action.equals("PICKUP")) {
 
-                if (!command.equals("")) {
-                    JSONObject jsonAction;
-                    try {
-                        jsonAction = new JSONObject(command);
-                        if (jsonAction.has("ACTION") && jsonAction.has("OBJECT")) {
-                            String action = jsonAction.getString("ACTION");
-                            String objectName = jsonAction.getString("OBJECT");
-                            if (action.equals("PICKUP")) {
+                            try {
 
-                                    try {
-                                        getC().putInSack(objectName);
-                                        getC().rotate(3);
-                                    } catch (CommandExecException e) {
-                                        e.printStackTrace();
-                                    }
-                                    getLog().info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
+                                getC().putInSack(objectName);
+                                getJewelsCollected().add(objectName);
+                                getC().rotate(3);
+
+                            } catch (CommandExecException e) {
+                                e.printStackTrace();
+                            }
+                            getLog().info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
+
+                        }
+                        if (action.equals("DELIVERY")) {
+
+                            JSONArray leaflets = jsonAction.getJSONArray("LEAFLETS");
+
+                            for (int i = 0; i < leaflets.length(); i++) {
+                                try {
+                                    getC().deliverLeaflet(leaflets.get(i).toString());
+                                } catch (Exception e) {
+
+                                }
+                            }
+
+                            getLog().info("Sending DELIVERY command to agent:****** " + objectName + "**********");
+                        }
+
+                        if (action.equals("EATIT")) {
+
+                            try {
+
+                                getC().eatIt(objectName);
+
+                                getC().rotate(3);
+
+                            } catch (Exception e) {
 
                             }
-                            if (action.equals("EATIT")) {
+                            getLog().info("Sending EAT command to agent:****** " + objectName + "**********");
 
-                                    try {
-                                        getC().eatIt(objectName);
-                                        getC().rotate(3);
-                                    } catch (Exception e) {
+                        }
+                        if (action.equals("BURY")) {
 
-                                    }
-                                    getLog().info("Sending EAT command to agent:****** " + objectName + "**********");
+                            try {
 
-                            }
-                            if (action.equals("BURY")) {
+                                getC().hideIt(objectName);
 
-                                    try {
+                                List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
 
-                                        getC().hideIt(objectName);
+                                List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
 
-                                        List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
+                                if (thingsA.size() > 0) {
+                                    Thing closestObstacle = thingsA.get(0);
+                                    if (closestObstacle.getName().contains("Food")) {
+                                        closestObstacle.hidden = true;
 
-                                        List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
+                                        List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
 
-                                        if(thingsA.size() > 0) {
-                                            Thing closestObstacle = thingsA.get(0);
-                                            if (closestObstacle.getName().contains("Food")) {
-                                                closestObstacle.hidden = true;
-
-                                                List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
-
-                                                if (things.size() == 0) {
+                                        if (things.size() == 0) {
+                                            things.add(closestObstacle);
+                                        } else {
+                                            for (int i = 0; i < things.size(); i++) {
+                                                if (!things.get(i).getName().equals(closestObstacle.getName())) {
                                                     things.add(closestObstacle);
-                                                } else {
-                                                    for (int i = 0; i < things.size(); i++) {
-                                                        if (!things.get(i).getName().equals(closestObstacle.getName())) {
-                                                            things.add(closestObstacle);
-                                                        }
-                                                    }
                                                 }
                                             }
                                         }
-
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
                                     }
+                                }
 
-                                    getLog().info("Sending BURY command to agent:****** " + objectName + "**********");
-
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                            if (action.equals("UNEARTH")) {
 
-                                    try {
+                            getLog().info("Sending BURY command to agent:****** " + objectName + "**********");
 
-                                        getC().unhideIt(objectName);
-
-                                        getC().eatIt(objectName);
-
-                                        getC().rotate(3);
-
-                                    } catch (CommandExecException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
-                                    for (int i = 0; i < things.size(); i++) {
-                                        if (things.get(i).getName().equals(objectName)) {
-                                            things.remove(i);
-                                            break;
-                                        }
-                                    }
-                                    getLog().info("Sending UNEARTH command to agent:****** " + objectName + "**********");
-
-                            }
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                setPreviousHandsAction(command);
-            }
+                        if (action.equals("UNEARTH")) {
 
+                            try {
+
+                                getC().unhideIt(objectName);
+
+                                getC().eatIt(objectName);
+
+                                getC().rotate(3);
+
+                            } catch (CommandExecException e) {
+                                e.printStackTrace();
+                            }
+
+                            List<Thing> things = (List<Thing>) getHiddenApplesMO().getI();
+                            for (int i = 0; i < things.size(); i++) {
+                                if (things.get(i).getName().equals(objectName)) {
+                                    things.remove(i);
+                                    break;
+                                }
+                            }
+                            getLog().info("Sending UNEARTH command to agent:****** " + objectName + "**********");
+
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            setPreviousHandsAction(command);
+        }
+
+        getJewelsCollectedMO().setI(getJewelsCollected());
 
     }
 
@@ -216,5 +247,21 @@ public class HandsActionCodelet extends Codelet {
 
     public void setR(Random r) {
         this.r = r;
+    }
+
+    public MemoryObject getJewelsCollectedMO() {
+        return jewelsCollectedMO;
+    }
+
+    public void setJewelsCollectedMO(MemoryObject jewelsCollectedMO) {
+        this.jewelsCollectedMO = jewelsCollectedMO;
+    }
+
+    public List<String> getJewelsCollected() {
+        return jewelsCollected;
+    }
+
+    public void setJewelsCollected(List<String> jewelsCollected) {
+        this.jewelsCollected = jewelsCollected;
     }
 }

@@ -18,6 +18,7 @@ import ws3dproxy.model.Creature;
 import ws3dproxy.model.Leaflet;
 import ws3dproxy.model.Thing;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,7 +54,6 @@ public class AvoidColisionObstacle extends Codelet {
 
         if (handsMO == null)
             handsMO = (MemoryObject) this.getOutput("HANDS_AVOID_DANGER");
-
 
 
     }
@@ -98,64 +98,92 @@ public class AvoidColisionObstacle extends Codelet {
 
                     e.printStackTrace();
                 }
-            } else {
+            } else if (closestObstacle.getName().contains("Jewel")) {
+                boolean exist = false;
 
-                if (closestObstacle.getName().contains("Jewel")) {
-                    boolean exist = false;
-
-                    for (Leaflet leaflet : getCreature().getLeaflets()) {
-                        if (leaflet.ifInLeaflet(closestObstacle.getMaterial().getColorName())) {
-                            exist = true;
-                            break;
-                        }
+                for (Leaflet leaflet : getCreature().getLeaflets()) {
+                    if (leaflet.ifInLeaflet(closestObstacle.getMaterial().getColorName())) {
+                        exist = true;
+                        break;
                     }
+                }
 
-                    if (!exist) {
-                        try {
-                            message.put("OBJECT", closestObstacle.getName());
-                            message.put("ACTION", "BURY");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                if (!exist) {
+                    try {
+                        message.put("OBJECT", closestObstacle.getName());
+                        message.put("ACTION", "BURY");
                         handsMO.setEvaluation(getActivation());
                         handsMO.setI(message.toString());
                         legsMO.setEvaluation(getActivation());
                         legsMO.setI("");
-                    } else {
-                        try {
-                            message.put("OBJECT", closestObstacle.getName());
-                            message.put("ACTION", "PICKUP");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        handsMO.setEvaluation(getActivation());
-                        handsMO.setI(message.toString());
-                        legsMO.setEvaluation(getActivation());
-                        legsMO.setI("");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 } else {
                     try {
                         message.put("OBJECT", closestObstacle.getName());
-                        message.put("ACTION", "BURY");
+                        message.put("ACTION", "PICKUP");
+                        handsMO.setEvaluation(getActivation());
+                        handsMO.setI(message.toString());
+                        legsMO.setEvaluation(getActivation());
+                        legsMO.setI("");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-
-                    handsMO.setEvaluation(getActivation());
-                    handsMO.setI(message.toString());
-
-                    legsMO.setEvaluation(getActivation());
-                    legsMO.setI("");
-
                 }
+            } else if (closestObstacle.getName().contains("DeliverySpot")) {
+                List<Long> leafletCompleted = new ArrayList<>();
+
+                creature.getLeaflets().forEach(leaflet -> {
+                    if (leaflet.getSituation() == 1)
+                        leafletCompleted.add(leaflet.getID());
+                });
+
+                if (leafletCompleted.size() > 0) {
+                    try {
+                        message.put("OBJECT", obstacleName);
+                        message.put("ACTION", "DELIVERY");
+                        message.put("LEAFLETS", leafletCompleted);
+                        handsMO.setEvaluation(getActivation());
+                        handsMO.setI(message.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        message.put("OBJECT", obstacleName);
+                        message.put("ACTION", "AVOID");
+                        legsMO.setEvaluation(getActivation());
+                        legsMO.setI(message.toString());
+                        handsMO.setEvaluation(getActivation());
+                        handsMO.setI("");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } else {
+                try {
+                    message.put("OBJECT", closestObstacle.getName());
+                    message.put("ACTION", "BURY");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                handsMO.setEvaluation(getActivation());
+                handsMO.setI(message.toString());
+                legsMO.setEvaluation(getActivation());
+                legsMO.setI("");
+
             }
+
         } else {
             legsMO.setEvaluation(getActivation());
             legsMO.setI("");
             handsMO.setEvaluation(getActivation());
             handsMO.setI("");
         }
+
     }
 
     public Creature getCreature() {

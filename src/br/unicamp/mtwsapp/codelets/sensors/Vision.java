@@ -8,8 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
+import ws3dproxy.CommandExecException;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
+import ws3dproxy.model.World;
 
 /**
  * @author Du

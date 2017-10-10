@@ -27,13 +27,18 @@ public class AmbitionMoodCodelet extends MoodCodelet {
         double moodValue;
         String state;
 
-        if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_GOOD)){
-            moodValue = appraisal.getEvaluation();
-            state = STATE_AMBITIOUS;
-        }else if(appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_BAD)){
-            moodValue = - appraisal.getEvaluation();
-            state = STATE_SATISFIED;
-        } else{
+        if(appraisal != null) {
+            if (appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_GOOD)) {
+                moodValue = appraisal.getEvaluation();
+                state = STATE_AMBITIOUS;
+            } else if (appraisal.getCurrentStateEvaluation().equals(CurrentAppraisalCodelet.STATE_BAD)) {
+                moodValue = -appraisal.getEvaluation();
+                state = STATE_SATISFIED;
+            } else {
+                moodValue = 0d;
+                state = STATE_NORMAL;
+            }
+        } else {
             moodValue = 0d;
             state = STATE_NORMAL;
         }

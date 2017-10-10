@@ -14,6 +14,7 @@ import ws3dproxy.model.WorldPoint;
  */
 public class CreatureInnerSense {
     private WorldPoint position;
+    private WorldPoint deliverySpotPosition;
     private double pitch;
     private double fuel;
     private Polygon fov;
@@ -24,11 +25,11 @@ public class CreatureInnerSense {
     private List<Thing> thingsInWorld;
     
     public String toString() {
+
         if (getPosition() != null)
             return("Position: ["+(int) getPosition().getX()+","+(int) getPosition().getY()+"] Pitch: ["+ getPitch() +"] Fuel: ["+ getFuel()+"] Leaflet Complete Rate: ["+ getLeafletCompleteRate() +"] Score: ["+getScore()+"]");
         else 
             return("Position: [null,null] "+" Pitch: ["+ getPitch() +"] Fuel: ["+ getFuel()+"]");
-
 
     }
 
@@ -102,6 +103,14 @@ public class CreatureInnerSense {
 
     public void setThingsInWorld(List<Thing> thingsInWorld) {
         this.thingsInWorld = thingsInWorld;
+    }
+
+    public WorldPoint getDeliverySpotPosition() {
+        return deliverySpotPosition;
+    }
+
+    public void setDeliverySpotPosition(WorldPoint deliverySpotPosition) {
+        this.deliverySpotPosition = deliverySpotPosition;
     }
 }
 

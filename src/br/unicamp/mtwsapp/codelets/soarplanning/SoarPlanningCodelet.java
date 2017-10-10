@@ -92,11 +92,6 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
             setOutputCommandMO((MemoryObject) getOutput(OUTPUT_COMMAND_MO));
         }
 
-        if (getInputFoodsMO() == null) {
-            setInputFoodsMO((MemoryObject) getInput(INPUT_FOODS_MO));
-        }
-
-
         if (getInputJewelsMO() == null) {
             setInputJewelsMO((MemoryObject) getInput(INPUT_JEWELS_MO));
         }
@@ -143,14 +138,13 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
         AbstractObject il = null;
 
         List<Thing> jewelThings = new CopyOnWriteArrayList(((List<Thing>) getInputJewelsMO().getI()));
-        List<Thing> foodThings = new CopyOnWriteArrayList((List<Thing>) getInputFoodsMO().getI());
         Goal goal = (Goal) getInputGoalMO().getI();
 
-        if (jewelThings != null && foodThings != null && goal != null) {
+        if (jewelThings != null && goal != null) {
 
             AbstractObject goalAO = goal.getGoalAbstractObjects();
 
-            il = processCreatureEntities(jewelThings, foodThings, goalAO);
+            il = processCreatureEntities(jewelThings, goalAO);
 
             setInputLinkAO(il);
         }
@@ -158,7 +152,7 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
     }
 
 
-    public AbstractObject processCreatureEntities(List<Thing> jewelThings, List<Thing> foodThings, AbstractObject goalAO) {
+    public AbstractObject processCreatureEntities(List<Thing> jewelThings, AbstractObject goalAO) {
 
         AbstractObject il = new AbstractObject("INPUTLINK");
         AbstractObject creatureAO = new AbstractObject("CREATURE");
@@ -171,11 +165,6 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
             jewelsAO = thingsToAbstractObject(jewelThings, "JEWELS");
             perceptionAO.addCompositePart(jewelsAO);
         }
-
-        /*if (foodThings != null) {
-            foodsAO = thingsToAbstractObject(foodThings, "FOODS");
-            perceptionAO.addCompositePart(foodsAO);
-        }*/
 
         creatureAO.addCompositePart(perceptionAO);
 
@@ -215,19 +204,13 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
         Property position = new Property("POSITION");
         position.addQualityDimension(new QualityDimension("X1", thing.getX1()));
-        //position.addQualityDimension(new QualityDimension("X2", thing.getX2()));
         position.addQualityDimension(new QualityDimension("Y1", thing.getY1()));
-        //position.addQualityDimension(new QualityDimension("Y2", thing.getY1()));
         abs.addProperty(position);
 
         Property distance = new Property("DISTANCE");
         distance.addQualityDimension(new QualityDimension("VALUE", creature.calculateDistanceTo(thing)));
         abs.addProperty(distance);
 
-        //Property size = new Property("SIZE");
-        //size.addQualityDimension(new QualityDimension("WIDTH", thing.getWidth()));
-        //size.addQualityDimension(new QualityDimension("HEIGHT", thing.getHeight()));
-        //abs.addProperty(size);
 
         Property color = new Property("MATERIAL");
         color.addQualityDimension(new QualityDimension("TYPE", thing.getMaterial().getColorName().toUpperCase()));

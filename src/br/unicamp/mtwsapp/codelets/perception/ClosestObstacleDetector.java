@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
+import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
@@ -54,13 +55,20 @@ public class ClosestObstacleDetector extends Codelet {
             if (!getKnown().isEmpty()) {
 
                 CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
+
                 for (Thing t : myknown) {
 
-                    double Dnew = getCreature().calculateDistanceTo(t);
-
-                    if (Dnew <= getReachDistance()) {
-                        getClosestObstacleMO().setI(t);
-                        break;
+                    if(t.getName().contains("DeliverySpot")){
+                        double distanceTo = getCreature().calculateDistanceTo(t);
+                        if(distanceTo <= (reachDistance + 25)) {
+                            getClosestObstacleMO().setI(t);
+                            break;
+                        }
+                    } else {
+                        if (isNear(t, reachDistance) != null) {
+                            getClosestObstacleMO().setI(t);
+                            break;
+                        }
                     }
 
                 }

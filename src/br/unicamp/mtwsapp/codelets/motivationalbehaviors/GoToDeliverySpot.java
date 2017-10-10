@@ -5,9 +5,14 @@ import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
+import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ws3dproxy.model.Creature;
+import ws3dproxy.model.Leaflet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Du
@@ -36,7 +41,7 @@ public class GoToDeliverySpot extends Codelet {
             setDrivesMO((MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY));
 
         if (getLegsMO() == null)
-            setLegsMO((MemoryObject) this.getOutput("LEGS_GO_JEWEL"));
+            setLegsMO((MemoryObject) this.getOutput("LEGS_GO_DELIVERY_SPOT"));
 
         if (getInnerSenseMO() == null) {
             setInnerSenseMO((MemoryObject) this.getInput("INNER"));
@@ -59,38 +64,47 @@ public class GoToDeliverySpot extends Codelet {
     @Override
     public synchronized void proc() {
 
-        double jewelX = 0;
-        double jewelY = 0;
-
         synchronized (getLegsMO()) {
-
             if (getLegsMO() != null) {
-                jewelX = 0;
-                jewelY = 0;
 
-                JSONObject message = new JSONObject();
-                try {
-                    message.put("ACTION", "GOTO");
-                    message.put("X", (int) jewelX);
-                    message.put("Y", (int) jewelY);
-                    message.put("SPEED", getCreatureBasicSpeed());
+                List<Leaflet> leafletCompleted = new ArrayList<>();
+                CreatureInnerSense innerSense = (CreatureInnerSense) getInnerSenseMO().getI();
 
-                    getLegsMO().setEvaluation(getActivation());
-                    getLegsMO().setI(message.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
+                creature.getLeaflets().forEach(leaflet -> {
+                    if (leaflet.getSituation() == 1)
+                        leafletCompleted.add(leaflet);
+                });
 
-                JSONObject message = new JSONObject();
-                try {
-                    message.put("ACTION", "FORAGE");
-                    getLegsMO().setI(message.toString());
-                    getLegsMO().setEvaluation(getActivation());
+                if(leafletCompleted.size() > 0) {
 
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    double jewelX  = innerSense.getDeliverySpotPosition().getX();
+                    double jewelY = innerSense.getDeliverySpotPosition().getY();
+
+                    JSONObject message = new JSONObject();
+                    try {
+                        message.put("ACTION", "GOTO");
+                        message.put("X", (int) jewelX);
+                        message.put("Y", (int) jewelY);
+                        message.put("SPEED", getCreatureBasicSpeed());
+                        message.put("LEAFLETS", leafletCompleted);
+
+                        getLegsMO().setEvaluation(getActivation());
+                        getLegsMO().setI(message.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
+                    JSONObject message = new JSONObject();
+                    try {
+                        message.put("ACTION", "FORAGE");
+                        legsMO.setI(message.toString());
+                        legsMO.setEvaluation(getActivation());
+
+                    } catch (JSONException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
         }

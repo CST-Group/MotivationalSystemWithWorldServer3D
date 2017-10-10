@@ -13,11 +13,8 @@ import br.unicamp.mtwsapp.codelets.emotional.HungerEmotionalCodelet;
 import br.unicamp.mtwsapp.codelets.goal.GoalGeneratorCodelet;
 import br.unicamp.mtwsapp.codelets.mood.AmbitionMoodCodelet;
 import br.unicamp.mtwsapp.codelets.mood.HungerMoodCodelet;
-import br.unicamp.mtwsapp.codelets.motivational.BoredomMotivationalCodelet;
+import br.unicamp.mtwsapp.codelets.motivational.*;
 import br.unicamp.mtwsapp.codelets.motivationalbehaviors.*;
-import br.unicamp.mtwsapp.codelets.motivational.AvoidDangerMotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.motivational.AmbitionMotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.motivational.HungerMotivationalCodelet;
 import br.unicamp.mtwsapp.codelets.motor.HandsActionCodelet;
 import br.unicamp.mtwsapp.codelets.motor.LegsActionCodelet;
 import br.unicamp.mtwsapp.codelets.perception.AppleDetector;
@@ -57,6 +54,7 @@ public class AgentMind extends Mind {
         MotivationalCodelet avoidDangerMotivationalCodelet = null;
         MotivationalCodelet ambitionMotivationalCodelet = null;
         MotivationalCodelet boredomMotivationalCodelet = null;
+        MotivationalCodelet esteemMotivationalCodelet = null;
         EmotionalCodelet hungerEmotionalCodelet = null;
         EmotionalCodelet ambitionEmotionalCodelet = null;
         //==================================
@@ -72,11 +70,12 @@ public class AgentMind extends Mind {
         MemoryObject knownJewelsMO;
         MemoryObject closestObstacleMO;
         MemoryObject hiddenObjetecsMO;
+        MemoryObject jewelsCollectedMO = createMemoryObject("JEWELS_COLLECTED");
         MemoryObject outputCommandMO = createMemoryObject(SoarPlanningCodelet.OUTPUT_COMMAND_MO);
         MemoryObject outputSelectedPlan = createMemoryObject(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO);
 
         int reachDistance = 65;
-        int brickDistance = 65;
+        int brickDistance = 48;
         //===============================
 
         closestAppleMO = createMemoryObject("CLOSEST_APPLE");
@@ -111,6 +110,7 @@ public class AgentMind extends Mind {
             hungerMotivationalCodelet = new HungerMotivationalCodelet("HungerDrive", 0, 0.3, 0.8);
             avoidDangerMotivationalCodelet = new AvoidDangerMotivationalCodelet("AvoidDangerDrive", 0, 0.45, 0.7);
             ambitionMotivationalCodelet = new AmbitionMotivationalCodelet("AmbitionDrive", 0, 0.2, 0.9);
+            esteemMotivationalCodelet = new EsteemMotivationalCodelet("EsteemDrive", 1, 0.25, 1);
             boredomMotivationalCodelet = new BoredomMotivationalCodelet("BoredomDrive", 0, 0.4, 0.65);
         } catch (CodeletActivationBoundsException e) {
             e.printStackTrace();
@@ -197,6 +197,7 @@ public class AgentMind extends Mind {
         List<Memory> ambitionSensorsMemory = new ArrayList<>();
         ambitionSensorsMemory.add(innerSenseMO);
         ambitionSensorsMemory.add(knownJewelsMO);
+        ambitionSensorsMemory.add(jewelsCollectedMO);
 
         Memory inputAmbitionSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
         inputAmbitionSensorsMO.setI(ambitionSensorsMemory);
@@ -235,6 +236,25 @@ public class AgentMind extends Mind {
         insertCodelet(avoidDangerMotivationalCodelet);
         //=================================
 
+        //Esteem Motivational Codelet
+        List<Memory> esteemSensorsMemory = new ArrayList<>();
+        esteemSensorsMemory.add(innerSenseMO);
+
+        Memory inputEsteemSensorsMO = createMemoryObject(MotivationalCodelet.INPUT_SENSORS_MEMORY);
+        inputEsteemSensorsMO.setI(esteemSensorsMemory);
+        esteemMotivationalCodelet.addInput(inputEsteemSensorsMO);
+
+        Memory inputEsteemDrivesMO = createMemoryObject(MotivationalCodelet.INPUT_DRIVES_MEMORY);
+        inputEsteemDrivesMO.setI(new HashMap<Memory, Double>());
+        esteemMotivationalCodelet.addInput(inputEsteemDrivesMO);
+
+        MemoryObject outputEsteemDriveMO = createMemoryObject(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+
+        esteemMotivationalCodelet.addOutput(outputEsteemDriveMO);
+
+        insertCodelet(esteemMotivationalCodelet);
+        //=================================
+
         // Create Motivational Behavior Codelets
         Codelet goToClosestJewel = new GoToJewel("GoToJewelMotivationalBehaviorCodelet", creatureBasicSpeed, env.c);
         MemoryObject legsGoJewelMO = createMemoryObject("LEGS_GO_JEWEL");
@@ -244,6 +264,13 @@ public class AgentMind extends Mind {
         goToClosestJewel.addInput(outputSelectedPlan);
         goToClosestJewel.addOutput(legsGoJewelMO);
         insertCodelet(goToClosestJewel);
+
+        Codelet goToDeliverySpot = new GoToDeliverySpot("GoToDeliverySpotMotivationalBehaviorCodelet", creatureBasicSpeed, env.c);
+        MemoryObject legsGoDeliverySpotMO = createMemoryObject("LEGS_GO_DELIVERY_SPOT");
+        goToDeliverySpot.addInput(innerSenseMO);
+        goToDeliverySpot.addInput(outputEsteemDriveMO);
+        goToDeliverySpot.addOutput(legsGoDeliverySpotMO);
+        insertCodelet(goToDeliverySpot);
 
         Codelet getJewel = new GetClosestJewel("GetClosestJewelMotivationalBehaviorCodelet", reachDistance, env.c);
         MemoryObject handsGetJewelMO = createMemoryObject("HANDS_GET_JEWEL");
@@ -296,6 +323,7 @@ public class AgentMind extends Mind {
         legsBehaviorMC.add(legsGoJewelMO);
         legsBehaviorMC.add(legsAvoidColisionMO);
         legsBehaviorMC.add(legsRandomMoveMO);
+        legsBehaviorMC.add(legsGoDeliverySpotMO);
         legs.addInput(legsBehaviorMC);
 
         insertCodelet(legs);
@@ -307,7 +335,9 @@ public class AgentMind extends Mind {
         handsBehaviorMC.add(handsAvoidColisionMO);
         hands.addInput(handsBehaviorMC);
         hands.addOutput(hiddenObjetecsMO);
+        hands.addOutput(jewelsCollectedMO);
         hands.addInput(visionMO);
+
 
         insertCodelet(hands);
         //============================
@@ -463,6 +493,7 @@ public class AgentMind extends Mind {
         mtCodelets.add(ambitionMotivationalCodelet);
         mtCodelets.add(hungerMotivationalCodelet);
         mtCodelets.add(boredomMotivationalCodelet);
+        mtCodelets.add(esteemMotivationalCodelet);
 
         List<EmotionalCodelet> emCodelets = new ArrayList<>();
         emCodelets.add(hungerEmotionalCodelet);
@@ -485,7 +516,7 @@ public class AgentMind extends Mind {
         mtbCodelets.add(goToClosestApple);
         mtbCodelets.add(goToClosestJewel);
         mtbCodelets.add(randomMove);
-        //mtbCodelets.add(goalGoToJewel);
+        mtbCodelets.add(goToDeliverySpot);
 
         getMotivationalSubsystemModule().setMotivationalCodelets(mtCodelets);
         getMotivationalSubsystemModule().setEmotionalCodelets(emCodelets);
@@ -496,7 +527,6 @@ public class AgentMind extends Mind {
         getPlansSubsystemModule().setjSoarCodelet(soarCodelet);
 
         MindViewer mindViewer = new MindViewer(this, "MindViewer", mtbCodelets);
-        //mindViewer.initMotivationalSubsystemViewer(mtCodelets, emCodelets, goCodelets, apCodelets, mdCodelets);
 
         mindViewer.setVisible(true);
         //================================================

@@ -11,6 +11,7 @@ import ws3dproxy.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,24 +19,29 @@ import java.util.List;
  */
 public class AmbitionMotivationalCodelet extends MotivationalCodelet {
 
-
+    private Date initDate;
 
     public AmbitionMotivationalCodelet(String name, double level, double priority, double urgencyThreshold) throws CodeletActivationBoundsException {
         super(name, level, priority, urgencyThreshold);
+        initDate = new Date();
     }
 
     @Override
     public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
+
+        //double diff = ((new Date()).getTime() - initDate.getTime())/60000;
+
         Memory cisMO = sensorsMemory.get(0);
-        Memory knownJewels = sensorsMemory.get(1);
+        Memory knownJewelsMO = sensorsMemory.get(1);
+        //Memory jewelsCollectedMO = sensorsMemory.get(2);
 
         double jewelsStimulus = 0;
         double ambitionDeficit = 0.0d;
 
-        if (knownJewels.getI() != null) {
+        if (knownJewelsMO.getI() != null) {
 
-            List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewels.getI());
+            List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewelsMO.getI());
             if (jewels.size() > 0)
                 jewelsStimulus = 0.2;
         } else {
@@ -43,14 +49,6 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
         }
 
         CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
-
-        /*if (cis.getLeafletList() != null) {
-
-            double collectedNumberLeaflet = getCollectedNumberOfJewelsInLeaflet(cis.getLeafletList());
-            double fullNumberLeaflet = getTotalNumberOfJewelsInLeaflet(cis.getLeafletList());
-
-            ambitionDeficit = (collectedNumberLeaflet / fullNumberLeaflet);
-        }*/
 
         ambitionDeficit = cis.getLeafletCompleteRate()/100;
 

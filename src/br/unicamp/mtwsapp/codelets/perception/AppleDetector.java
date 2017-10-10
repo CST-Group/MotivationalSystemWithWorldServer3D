@@ -80,7 +80,6 @@ public class AppleDetector extends Codelet {
             known.removeAll(known);
         }
 
-
         List<Thing> hiddenThings = (List<Thing>) getHiddenObjectsMO().getI();
 
         for (Thing thing : hiddenThings) {
