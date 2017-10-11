@@ -5,6 +5,9 @@
  */
 package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
+
+import br.unicamp.cst.bindings.soar.Plan;
+import br.unicamp.cst.bindings.soar.PlanSelectionCodelet;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
@@ -13,7 +16,7 @@ import java.util.*;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.soarplanning.PlanSelectionCodelet;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanSelectionCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
@@ -36,13 +39,10 @@ public class GoToJewel extends Codelet {
     private int creatureBasicSpeed;
     private Creature creature;
 
-    private SoarPlan soarPlan;
-
     public GoToJewel(String name, int creatureBasicSpeed, Creature creature) {
         this.setName(name);
         this.creatureBasicSpeed = creatureBasicSpeed;
         this.setCreature(creature);
-        this.setSoarPlan(null);
     }
 
     @Override
@@ -74,8 +74,8 @@ public class GoToJewel extends Codelet {
 
         try {
             if (drive != null) {
-                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
-                if (soarPlan != null) {
+                Plan plan = (Plan) planSelectedMO.getI();
+                if (plan != null) {
                     setActivation(0.5 + drive.getPriority());
                 } else {
                     setActivation(drive.getActivation());
@@ -98,9 +98,9 @@ public class GoToJewel extends Codelet {
 
         synchronized (legsMO) {
             synchronized (jewels) {
-                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
+                Plan plan = (Plan) planSelectedMO.getI();
 
-                if (!jewels.isEmpty() && soarPlan == null) {
+                if (!jewels.isEmpty() && plan == null) {
                     Thing jewel = jewels.get(0);
 
                     jewelX = jewel.getX1();
@@ -119,10 +119,10 @@ public class GoToJewel extends Codelet {
                         e.printStackTrace();
                     }
                 } else {
-                    if (soarPlan != null) {
+                    if (plan != null) {
                         try {
 
-                            for (SoarJewel soarJewel : soarPlan.getSoarJewels()) {
+                            for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
                                 CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
                                 Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
 
@@ -138,6 +138,7 @@ public class GoToJewel extends Codelet {
                             message.put("ACTION", "GOTO");
                             message.put("X", (int) jewelX);
                             message.put("Y", (int) jewelY);
+                            message.put("FROMPLAN", true);
                             message.put("SPEED", creatureBasicSpeed);
 
                             legsMO.setEvaluation(getActivation());
@@ -170,14 +171,6 @@ public class GoToJewel extends Codelet {
 
     public void setCreature(Creature creature) {
         this.creature = creature;
-    }
-
-    public SoarPlan getSoarPlan() {
-        return soarPlan;
-    }
-
-    public void setSoarPlan(SoarPlan soarPlan) {
-        this.soarPlan = soarPlan;
     }
 
     public MemoryObject getInnerSenseMO() {

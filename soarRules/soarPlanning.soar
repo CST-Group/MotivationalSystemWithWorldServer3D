@@ -21,17 +21,20 @@ sp {apply*init
 
    (<a> ^index 0.0)
    (<a> ^counter 0)
+   (<a> ^score 0)
    (<a> ^jewels <jewels1>)
    (<a> ^jewelsinleaflet <jewelsInLeaflet1>)
 
 
    (<b> ^index 1.0)
    (<b> ^counter 0)
+   (<b> ^score 0)
    (<b> ^jewels <jewels2>)
    (<b> ^jewelsinleaflet <jewelsInLeaflet2>)
 
    (<c> ^index 2.0)
    (<c> ^counter 0)
+   (<c> ^score 0)
    (<c> ^jewels <jewels3>)
    (<c> ^jewelsinleaflet <jewelsInLeaflet3>)
 
@@ -60,11 +63,15 @@ sp {apply*initPlans
    (<leaflet> ^JEWELSINLEAFLET.MAGENTA <magenta>)
    (<leaflet> ^JEWELSINLEAFLET.WHITE <white>)
    (<leaflet> ^INDEX <index>)
+   (<leaflet> ^SCORE <score>)
    (<cmd> ^plans <plans>)
    (<plans> ^index <index>)
+   (<plans> ^score <score2>)
    (<plans> ^jewelsinleaflet <jewelinleaflet>)
 -->
    (<s> ^name initPlans)
+   (<plans> ^score <score2> -
+                        (+ <score2> <score>))
    (<jewelinleaflet> ^RED <red>)
    (<jewelinleaflet> ^GREEN <green>)
    (<jewelinleaflet> ^BLUE <blue>)
@@ -79,25 +86,22 @@ sp {propose*move*jewel
    (<il> ^CREATURE <creature>)
    (<creature> ^GOAL <goal>)
    (<creature> ^PERCEPTION <perception>)
-   (<goal> ^LEAFLET <leaflet>)
-   (<leaflet>   ^JEWELSINLEAFLET.<color> > 0
-                ^SCORE <score>
-                ^INDEX <index>)
    (<perception> ^JEWELS <jewels>)
    (<jewels> ^THING <thing>)
    (<thing> ^MATERIAL.TYPE <color>
-            ^NAME.VALUE <name>
-            ^POSITION.X1 <x1>
-            ^POSITION.Y1 <y1>
-            ^DISTANCE.VALUE <distance>)
+               ^NAME.VALUE <name>
+               ^POSITION.X1 <x1>
+               ^POSITION.Y1 <y1>
+               ^DISTANCE.VALUE <distance>)
    (<cmd> ^plans <plans>)
+   (<plans> ^jewelsinleaflet.<color> > 0
+            ^index <index>
+            ^score <score>)
    (<plans> ^jewels <jewelPlan>)
-   (<plans> ^jewelsinleaflet <jewelinleaflet>)
-   (<jewelinleaflet> ^<color> <num1> > 0)
-   -(<jewelPlan> ^SoarJewel <jewel>)
-   -(<jewel> ^name <name>)
+   -(<jewelPlan> ^SoarJewel.name <name>)
+
 -->
-   (<s> ^operator <o> +)
+   (<s> ^operator <o>)
    (<o> ^name getJewel)
    (<o> ^color <color>)
    (<o> ^jewelName <name>)
@@ -127,12 +131,12 @@ sp {apply*move*jewel
    (<id> ^counter <num>)
    (<id> ^jewels <jewels>)
    (<id> ^jewelsinleaflet <jewelinleaflet>)
-   (<jewelinleaflet> ^<color> <num1> > 0)
+   (<jewelinleaflet> ^<color> <qtd>)
 -->
    (<id> ^counter <num> -
                          (+ <num> 1))
-   (<jewelinleaflet> ^<color> <num1> -
-                         (- <num1> 1))
+   (<jewelinleaflet> ^<color> <qtd> -
+                         (- <qtd> 1))
    (<jewels>  ^SoarJewel <newJewel>)
    (<newJewel>  ^name <name>)
    (<newJewel>  ^color <color>)

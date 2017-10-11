@@ -25,12 +25,10 @@ public class GoToApple extends Codelet {
     private MemoryObject legsMO;
 
     private int creatureBasicSpeed;
-    private Creature creature;
 
-    public GoToApple(String name, int creatureBasicSpeed, Creature creature) {
+    public GoToApple(String name, int creatureBasicSpeed) {
         this.setName(name);
         this.creatureBasicSpeed = creatureBasicSpeed;
-        this.creature = creature;
     }
 
     @Override

@@ -1,8 +1,20 @@
 package br.unicamp.mtwsapp.application;
 
+import br.unicamp.cst.bindings.soar.JSoarCodelet;
+import br.unicamp.cst.bindings.soar.PlanSelectionCodelet;
 import br.unicamp.cst.core.entities.*;
+import br.unicamp.cst.core.entities.Codelet;
+import br.unicamp.cst.core.entities.Memory;
+import br.unicamp.cst.core.entities.MemoryContainer;
+import br.unicamp.cst.core.entities.MemoryObject;
+import br.unicamp.cst.core.entities.Mind;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import br.unicamp.cst.motivational.*;
+import br.unicamp.cst.motivational.AppraisalCodelet;
+import br.unicamp.cst.motivational.EmotionalCodelet;
+import br.unicamp.cst.motivational.GoalCodelet;
+import br.unicamp.cst.motivational.MoodCodelet;
+import br.unicamp.cst.motivational.MotivationalCodelet;
 import br.unicamp.cst.representation.owrl.AbstractObject;
 import br.unicamp.cst.representation.owrl.Property;
 import br.unicamp.cst.representation.owrl.QualityDimension;
@@ -28,9 +40,8 @@ import br.unicamp.mtwsapp.codelets.sensors.Vision;
 import java.io.File;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import br.unicamp.mtwsapp.codelets.soarplanning.PlanSelectionCodelet;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanSelectionCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanningCodelet;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import br.unicamp.mtwsapp.support.SimulationController;
@@ -71,8 +82,10 @@ public class AgentMind extends Mind {
         MemoryObject closestObstacleMO;
         MemoryObject hiddenObjetecsMO;
         MemoryObject jewelsCollectedMO = createMemoryObject("JEWELS_COLLECTED");
-        MemoryObject outputCommandMO = createMemoryObject(SoarPlanningCodelet.OUTPUT_COMMAND_MO);
+        MemoryObject outputCommandMO = createMemoryObject(JSoarCodelet.OUTPUT_COMMAND_MO);
         MemoryObject outputSelectedPlan = createMemoryObject(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO);
+
+
 
         int reachDistance = 65;
         int brickDistance = 48;
@@ -301,7 +314,7 @@ public class AgentMind extends Mind {
         eatApple.addOutput(handsEatAppleMO);
         insertCodelet(eatApple);
 
-        Codelet goToClosestApple = new GoToApple("GoToAppleMotivationalBehaviorCodelet", creatureBasicSpeed, env.c);
+        Codelet goToClosestApple = new GoToApple("GoToAppleMotivationalBehaviorCodelet", creatureBasicSpeed);
         MemoryObject legsGoAppleMO = createMemoryObject("LEGS_GO_APPLE");
         goToClosestApple.addInput(outputHungryDriveMO);
         goToClosestApple.addInput(knownApplesMO);
@@ -478,12 +491,19 @@ public class AgentMind extends Mind {
 
         insertCodelet(soarCodelet);
 
-        PlanSelectionCodelet planSelectionCodelet = new PlanSelectionCodelet("PlanSelection", env.c);
-        planSelectionCodelet.addInput(innerSenseMO);
-        planSelectionCodelet.addInput(outputCommandMO);
-        planSelectionCodelet.addOutput(outputSelectedPlan);
+        //===================================
 
-        insertCodelet(planSelectionCodelet);
+        // Soar Plan Selection Codelet
+
+        PlanSelectionCodelet soarPlanSelectionCodelet = new SoarPlanSelectionCodelet("PlanSelection", env.c);
+        MemoryContainer inputDataMC = createMemoryContainer(PlanSelectionCodelet.INPUT_DATA_MC);
+        inputDataMC.add(innerSenseMO);
+        soarPlanSelectionCodelet.addInput(inputDataMC);
+        soarPlanSelectionCodelet.addInput(outputCommandMO);
+        soarPlanSelectionCodelet.addOutput(outputSelectedPlan);
+        soarPlanSelectionCodelet.addOutput(createMemoryObject(PlanSelectionCodelet.OUTPUT_PLANS_SET_MO));
+
+        insertCodelet(soarPlanSelectionCodelet);
 
         //===================================
 
@@ -525,6 +545,8 @@ public class AgentMind extends Mind {
         getMotivationalSubsystemModule().setMoodCodelets(mdCodelets);
 
         getPlansSubsystemModule().setjSoarCodelet(soarCodelet);
+        getPlansSubsystemModule().setPlanSelectionCodelet(soarPlanSelectionCodelet);
+
 
         MindViewer mindViewer = new MindViewer(this, "MindViewer", mtbCodelets);
 

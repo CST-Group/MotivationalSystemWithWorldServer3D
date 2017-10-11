@@ -49,6 +49,9 @@ public class ClosestObstacleDetector extends Codelet {
 
     @Override
     public synchronized void proc() {
+
+        boolean isFound = false;
+
         setKnown(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
 
         synchronized (getKnown()) {
@@ -58,20 +61,26 @@ public class ClosestObstacleDetector extends Codelet {
 
                 for (Thing t : myknown) {
 
-                    if(t.getName().contains("DeliverySpot")){
+                    if (t.getName().contains("DeliverySpot")) {
                         double distanceTo = getCreature().calculateDistanceTo(t);
-                        if(distanceTo <= (reachDistance + 25)) {
+                        if (distanceTo <= (reachDistance + 25)) {
                             getClosestObstacleMO().setI(t);
+                            isFound = true;
                             break;
                         }
                     } else {
                         if (isNear(t, reachDistance) != null) {
                             getClosestObstacleMO().setI(t);
+                            isFound = true;
                             break;
                         }
                     }
 
                 }
+
+                if (isFound == false)
+                    getClosestObstacleMO().setI(null);
+
             } else {
                 getClosestObstacleMO().setI(null);
             }

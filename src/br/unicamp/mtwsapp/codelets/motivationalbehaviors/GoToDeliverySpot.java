@@ -52,9 +52,11 @@ public class GoToDeliverySpot extends Codelet {
     @Override
     public void calculateActivation() {
         Drive drive = (Drive) getDrivesMO().getI();
-
         try {
-            setActivation(drive.getActivation());
+            if(drive != null)
+                setActivation(drive.getActivation());
+            else
+                setActivation(0);
         } catch (CodeletActivationBoundsException e) {
             e.printStackTrace();
         }

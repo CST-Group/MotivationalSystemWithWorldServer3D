@@ -5,23 +5,21 @@
  */
 package br.unicamp.mtwsapp.codelets.motivationalbehaviors;
 
+import br.unicamp.cst.bindings.soar.Plan;
+import br.unicamp.cst.bindings.soar.PlanSelectionCodelet;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.soarplanning.PlanSelectionCodelet;
+import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanSelectionCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
-import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanningCodelet;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,8 +76,8 @@ public class GetClosestJewel extends Codelet {
 
         try {
             if (drive != null) {
-                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
-                if (soarPlan != null) {
+                Plan plan = (Plan) planSelectedMO.getI();
+                if (plan != null) {
                     setActivation(0.5 + drive.getPriority());
                 } else {
                     setActivation(drive.getActivation());
@@ -105,10 +103,10 @@ public class GetClosestJewel extends Codelet {
 
         if (getClosestJewel() != null) {
             try {
-                SoarPlan soarPlan = (SoarPlan) planSelectedMO.getI();
-                if (soarPlan != null) {
+                Plan plan = (Plan) planSelectedMO.getI();
+                if (plan != null) {
 
-                    for (SoarJewel soarJewel : soarPlan.getSoarJewels()) {
+                    for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
                         CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
                         Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
 

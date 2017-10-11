@@ -3,6 +3,7 @@
  */
 package br.unicamp.mtwsapp.codelets.soarplanning;
 
+import br.unicamp.cst.bindings.soar.JSoarCodelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import br.unicamp.cst.motivational.Appraisal;
@@ -54,8 +55,6 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     public static final String OUTPUT_CURRENT_SOAR_PLAN_MO = "OUTPUT_CURRENT_SOAR_PLAN_MO";
 
-    public static final String OUTPUT_COMMAND_MO = "OUTPUT_COMMAND_MO";
-
     public static final String INPUT_FOODS_MO = "INPUT_FOODS_MO";
 
     public static final String INPUT_JEWELS_MO = "INPUT_JEWELS_MO";
@@ -89,7 +88,7 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
         }
 
         if (getOutputCommandMO() == null) {
-            setOutputCommandMO((MemoryObject) getOutput(OUTPUT_COMMAND_MO));
+            setOutputCommandMO((MemoryObject) getOutput(JSoarCodelet.OUTPUT_COMMAND_MO));
         }
 
         if (getInputJewelsMO() == null) {

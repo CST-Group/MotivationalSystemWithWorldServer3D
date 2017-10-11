@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_motivationalsystemwithworldserver3d" default="compile.module.motivationalsystemwithworldserver3d">
+  <dirname property="module.motivationalsystemwithworldserver3d.basedir" file="${ant.file.module_motivationalsystemwithworldserver3d}"/>
+  
+  <property name="module.jdk.home.motivationalsystemwithworldserver3d" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.motivationalsystemwithworldserver3d" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.motivationalsystemwithworldserver3d" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.motivationalsystemwithworldserver3d" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="motivationalsystemwithworldserver3d.output.dir" value="${module.motivationalsystemwithworldserver3d.basedir}/out/production/MotivationalSystemWithWorldServer3D"/>
+  <property name="motivationalsystemwithworldserver3d.testoutput.dir" value="${module.motivationalsystemwithworldserver3d.basedir}/out/test/MotivationalSystemWithWorldServer3D"/>
+  
+  <path id="motivationalsystemwithworldserver3d.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="motivationalsystemwithworldserver3d.module.production.classpath">
+    <path refid="${module.jdk.classpath.motivationalsystemwithworldserver3d}"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.numentalibs.classpath"/>
+  </path>
+  
+  <path id="motivationalsystemwithworldserver3d.runtime.production.module.classpath">
+    <pathelement location="${motivationalsystemwithworldserver3d.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.numentalibs.classpath"/>
+  </path>
+  
+  <path id="motivationalsystemwithworldserver3d.module.classpath">
+    <path refid="${module.jdk.classpath.motivationalsystemwithworldserver3d}"/>
+    <pathelement location="${motivationalsystemwithworldserver3d.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.numentalibs.classpath"/>
+  </path>
+  
+  <path id="motivationalsystemwithworldserver3d.runtime.module.classpath">
+    <pathelement location="${motivationalsystemwithworldserver3d.testoutput.dir}"/>
+    <pathelement location="${motivationalsystemwithworldserver3d.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+    <path refid="library.numentalibs.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.motivationalsystemwithworldserver3d">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.motivationalsystemwithworldserver3d">
+    <patternset refid="excluded.from.module.motivationalsystemwithworldserver3d"/>
+  </patternset>
+  
+  <path id="motivationalsystemwithworldserver3d.module.sourcepath">
+    <dirset dir="${module.motivationalsystemwithworldserver3d.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.motivationalsystemwithworldserver3d" depends="compile.module.motivationalsystemwithworldserver3d.production,compile.module.motivationalsystemwithworldserver3d.tests" description="Compile module MotivationalSystemWithWorldServer3D"/>
+  
+  <target name="compile.module.motivationalsystemwithworldserver3d.production" depends="register.custom.compilers" description="Compile module MotivationalSystemWithWorldServer3D; production classes">
+    <mkdir dir="${motivationalsystemwithworldserver3d.output.dir}"/>
+    <javac2 destdir="${motivationalsystemwithworldserver3d.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.motivationalsystemwithworldserver3d}/javac">
+      <compilerarg line="${compiler.args.motivationalsystemwithworldserver3d}"/>
+      <bootclasspath refid="motivationalsystemwithworldserver3d.module.bootclasspath"/>
+      <classpath refid="motivationalsystemwithworldserver3d.module.production.classpath"/>
+      <src refid="motivationalsystemwithworldserver3d.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.motivationalsystemwithworldserver3d"/>
+    </javac2>
+    
+    <copy todir="${motivationalsystemwithworldserver3d.output.dir}">
+      <fileset dir="${module.motivationalsystemwithworldserver3d.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.motivationalsystemwithworldserver3d.tests" depends="register.custom.compilers,compile.module.motivationalsystemwithworldserver3d.production" description="compile module MotivationalSystemWithWorldServer3D; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.motivationalsystemwithworldserver3d" description="cleanup module">
+    <delete dir="${motivationalsystemwithworldserver3d.output.dir}"/>
+    <delete dir="${motivationalsystemwithworldserver3d.testoutput.dir}"/>
+  </target>
+</project>

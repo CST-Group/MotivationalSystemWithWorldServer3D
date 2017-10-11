@@ -5,8 +5,6 @@ import java.util.List;
 
 public class SoarPlan {
 
-    public boolean isFinished = false;
-
     public List<SoarJewel> soarJewels;
 
     public SoarPlan(){
@@ -19,13 +17,5 @@ public class SoarPlan {
 
     public void setSoarJewels(List<SoarJewel> soarJewels) {
         this.soarJewels = soarJewels;
-    }
-
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void setFinished(boolean finished) {
-        isFinished = finished;
     }
 }
