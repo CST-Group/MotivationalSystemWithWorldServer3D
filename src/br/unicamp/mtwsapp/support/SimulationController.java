@@ -187,8 +187,6 @@ public class SimulationController {
                 e.printStackTrace();
             }
         }
-
-
     }
 
 

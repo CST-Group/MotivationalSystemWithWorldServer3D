@@ -39,11 +39,8 @@ public class AppleDetector extends Codelet {
 
     @Override
     public synchronized void proc() {
-        List<Thing> vision = null;
-        List<Thing> known = null;
-
-        vision = new ArrayList<>(((List<Thing>) getVisionMO().getI()));
-        known = new ArrayList<>((List<Thing>) getKnownApplesMO().getI());
+        List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
+        List<Thing> known = Collections.synchronizedList((List<Thing>) getKnownApplesMO().getI());;
 
         if (vision.size() != 0) {
             Comparator<Thing> comparator = new Comparator<Thing>() {

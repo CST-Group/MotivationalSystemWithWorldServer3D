@@ -2,9 +2,7 @@ package br.unicamp.mtwsapp.codelets.soarplanning;
 
 import br.unicamp.cst.bindings.soar.*;
 import br.unicamp.cst.core.entities.MemoryObject;
-import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import ws3dproxy.model.Creature;
-import ws3dproxy.model.Thing;
 
 import java.util.*;
 
@@ -54,11 +52,10 @@ public class SoarPlanSelectionCodelet extends PlanSelectionCodelet {
 
             for (SoarJewel soarJewel : ((SoarPlan) plan.getContent()).getSoarJewels()) {
 
+                List<String> jewelsCollected = Collections.synchronizedList((List<String>)(getInputDataMC().getI(0)));
+                Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
 
-                CreatureInnerSense cis = (CreatureInnerSense)(getInputDataMC().getI(0));
-                Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
-
-                if (!first.isPresent())
+                if (first.isPresent())
                     counter++;
             }
 

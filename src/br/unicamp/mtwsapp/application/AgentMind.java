@@ -276,6 +276,7 @@ public class AgentMind extends Mind {
         goToClosestJewel.addInput(knownJewelsMO);
         goToClosestJewel.addInput(outputSelectedPlan);
         goToClosestJewel.addOutput(legsGoJewelMO);
+        goToClosestJewel.addInput(jewelsCollectedMO);
         insertCodelet(goToClosestJewel);
 
         Codelet goToDeliverySpot = new GoToDeliverySpot("GoToDeliverySpotMotivationalBehaviorCodelet", creatureBasicSpeed, env.c);
@@ -291,6 +292,7 @@ public class AgentMind extends Mind {
         getJewel.addInput(closestJewelMO);
         getJewel.addInput(innerSenseMO);
         getJewel.addInput(outputSelectedPlan);
+        getJewel.addInput(jewelsCollectedMO);
         getJewel.addOutput(handsGetJewelMO);
         insertCodelet(getJewel);
 
@@ -497,7 +499,7 @@ public class AgentMind extends Mind {
 
         PlanSelectionCodelet soarPlanSelectionCodelet = new SoarPlanSelectionCodelet("PlanSelection", env.c);
         MemoryContainer inputDataMC = createMemoryContainer(PlanSelectionCodelet.INPUT_DATA_MC);
-        inputDataMC.add(innerSenseMO);
+        inputDataMC.add(jewelsCollectedMO);
         soarPlanSelectionCodelet.addInput(inputDataMC);
         soarPlanSelectionCodelet.addInput(outputCommandMO);
         soarPlanSelectionCodelet.addOutput(outputSelectedPlan);
@@ -560,6 +562,7 @@ public class AgentMind extends Mind {
         simulationController.addMO(outputAvoidDangerDriveMO);
         simulationController.addMO(outputBoredomDriveMO);
         simulationController.addMO(outputHungryDriveMO);
+        simulationController.addMO(outputEsteemDriveMO);
 
         simulationController.setCreatureInnerSenseMO(innerSenseMO);
         simulationController.setCreature(env.c);

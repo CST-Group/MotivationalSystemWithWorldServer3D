@@ -13,11 +13,12 @@ import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanSelectionCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
@@ -35,6 +36,7 @@ public class GetClosestJewel extends Codelet {
     private MemoryObject innerSenseMO;
     private MemoryObject drivesMO;
     private MemoryObject planSelectedMO;
+    private MemoryObject jewelsCollectedMO;
 
     private int reachDistance;
     private MemoryObject handsMO;
@@ -63,8 +65,12 @@ public class GetClosestJewel extends Codelet {
             setInnerSenseMO((MemoryObject) this.getInput("INNER"));
         }
 
-        if (planSelectedMO == null) {
-            planSelectedMO = (MemoryObject) this.getInput(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO);
+        if (getPlanSelectedMO() == null) {
+            setPlanSelectedMO((MemoryObject) this.getInput(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO));
+        }
+
+        if (getJewelsCollectedMO() == null) {
+            setJewelsCollectedMO((MemoryObject) this.getInput("JEWELS_COLLECTED"));
         }
     }
 
@@ -76,7 +82,7 @@ public class GetClosestJewel extends Codelet {
 
         try {
             if (drive != null) {
-                Plan plan = (Plan) planSelectedMO.getI();
+                Plan plan = (Plan) getPlanSelectedMO().getI();
                 if (plan != null) {
                     setActivation(0.5 + drive.getPriority());
                 } else {
@@ -103,17 +109,18 @@ public class GetClosestJewel extends Codelet {
 
         if (getClosestJewel() != null) {
             try {
-                Plan plan = (Plan) planSelectedMO.getI();
+                Plan plan = (Plan) getPlanSelectedMO().getI();
                 if (plan != null) {
 
                     for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
-                        CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
-                        Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
 
-                        if (first.isPresent()) {
+                        List<String> jewelsCollected = Collections.synchronizedList((List<String>) getJewelsCollectedMO().getI());
+
+                        Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
+
+                        if (!first.isPresent()) {
                             jewelX = soarJewel.getX1();
                             jewelY = soarJewel.getY1();
-                            jewelName = soarJewel.getName();
                             break;
                         }
                     }
@@ -231,5 +238,21 @@ public class GetClosestJewel extends Codelet {
 
     public void setCis(CreatureInnerSense cis) {
         this.cis = cis;
+    }
+
+    public MemoryObject getPlanSelectedMO() {
+        return planSelectedMO;
+    }
+
+    public void setPlanSelectedMO(MemoryObject planSelectedMO) {
+        this.planSelectedMO = planSelectedMO;
+    }
+
+    public MemoryObject getJewelsCollectedMO() {
+        return jewelsCollectedMO;
+    }
+
+    public void setJewelsCollectedMO(MemoryObject jewelsCollectedMO) {
+        this.jewelsCollectedMO = jewelsCollectedMO;
     }
 }

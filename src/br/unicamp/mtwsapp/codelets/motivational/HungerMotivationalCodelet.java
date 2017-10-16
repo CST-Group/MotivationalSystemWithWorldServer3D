@@ -7,6 +7,7 @@ import br.unicamp.cst.motivational.MotivationalCodelet;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import ws3dproxy.model.Thing;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class HungerMotivationalCodelet extends MotivationalCodelet {
 
         synchronized (knownApples) {
             if (knownApples.getI() != null) {
-                List<Thing> foods = (List<Thing>) knownApples.getI();
+                List<Thing> foods = Collections.synchronizedList((List<Thing>) knownApples.getI());
                 if (foods.size() > 0)
                     foodsStimulus = 0.2;
             } else {

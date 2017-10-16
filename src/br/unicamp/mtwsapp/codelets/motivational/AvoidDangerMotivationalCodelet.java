@@ -6,6 +6,7 @@ import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
 import ws3dproxy.model.Thing;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
 
         synchronized (visionMO){
             if(visionMO.getI() != null){
-                List<Thing> vision = (List<Thing>) visionMO.getI();
+                List<Thing> vision = Collections.synchronizedList((List<Thing>) visionMO.getI());
                 if(vision.stream().filter(thing -> thing.getName().contains("Brick")).collect(Collectors.toList()).size() > 0 ||
                         vision.stream().filter(thing -> thing.getName().contains("DeliverySpot")).collect(Collectors.toList()).size() > 0){
                     obstacleStimulus = 0.05;

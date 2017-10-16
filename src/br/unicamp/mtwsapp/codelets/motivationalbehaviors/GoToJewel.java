@@ -16,7 +16,6 @@ import java.util.*;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
-import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlanSelectionCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
@@ -35,34 +34,39 @@ public class GoToJewel extends Codelet {
     private MemoryObject drivesMO;
     private MemoryObject planSelectedMO;
     private MemoryObject innerSenseMO;
+    private MemoryObject jewelsCollectedMO;
 
     private int creatureBasicSpeed;
     private Creature creature;
 
     public GoToJewel(String name, int creatureBasicSpeed, Creature creature) {
         this.setName(name);
-        this.creatureBasicSpeed = creatureBasicSpeed;
+        this.setCreatureBasicSpeed(creatureBasicSpeed);
         this.setCreature(creature);
     }
 
     @Override
     public void accessMemoryObjects() {
 
-        if (drivesMO == null)
-            drivesMO = (MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY);
+        if (getDrivesMO() == null)
+            setDrivesMO((MemoryObject) this.getInput(MotivationalCodelet.OUTPUT_DRIVE_MEMORY));
 
-        if (knownJewels == null)
-            knownJewels = (MemoryObject) this.getInput("KNOWN_JEWELS");
+        if (getKnownJewels() == null)
+            setKnownJewels((MemoryObject) this.getInput("KNOWN_JEWELS"));
 
-        if (legsMO == null)
-            legsMO = (MemoryObject) this.getOutput("LEGS_GO_JEWEL");
+        if (getLegsMO() == null)
+            setLegsMO((MemoryObject) this.getOutput("LEGS_GO_JEWEL"));
 
-        if (planSelectedMO == null) {
-            planSelectedMO = (MemoryObject) this.getInput(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO);
+        if (getPlanSelectedMO() == null) {
+            setPlanSelectedMO((MemoryObject) this.getInput(PlanSelectionCodelet.OUPUT_SELECTED_PLAN_MO));
         }
 
         if (getInnerSenseMO() == null) {
             setInnerSenseMO((MemoryObject) this.getInput("INNER"));
+        }
+
+        if (getJewelsCollectedMO() == null) {
+            setJewelsCollectedMO((MemoryObject) this.getInput("JEWELS_COLLECTED"));
         }
 
 
@@ -70,11 +74,11 @@ public class GoToJewel extends Codelet {
 
     @Override
     public void calculateActivation() {
-        Drive drive = (Drive) drivesMO.getI();
+        Drive drive = (Drive) getDrivesMO().getI();
 
         try {
             if (drive != null) {
-                Plan plan = (Plan) planSelectedMO.getI();
+                Plan plan = (Plan) getPlanSelectedMO().getI();
                 if (plan != null) {
                     setActivation(0.5 + drive.getPriority());
                 } else {
@@ -92,13 +96,13 @@ public class GoToJewel extends Codelet {
 
     @Override
     public synchronized void proc() {
-        List<Thing> jewels = Collections.synchronizedList((List<Thing>) knownJewels.getI());
+        List<Thing> jewels = Collections.synchronizedList((List<Thing>) getKnownJewels().getI());
         double jewelX = 0;
         double jewelY = 0;
 
-        synchronized (legsMO) {
+        synchronized (getLegsMO()) {
             synchronized (jewels) {
-                Plan plan = (Plan) planSelectedMO.getI();
+                Plan plan = (Plan) getPlanSelectedMO().getI();
 
                 if (!jewels.isEmpty() && plan == null) {
                     Thing jewel = jewels.get(0);
@@ -111,10 +115,10 @@ public class GoToJewel extends Codelet {
                         message.put("ACTION", "GOTO");
                         message.put("X", (int) jewelX);
                         message.put("Y", (int) jewelY);
-                        message.put("SPEED", creatureBasicSpeed);
+                        message.put("SPEED", getCreatureBasicSpeed());
 
-                        legsMO.setEvaluation(getActivation());
-                        legsMO.setI(message.toString());
+                        getLegsMO().setEvaluation(getActivation());
+                        getLegsMO().setI(message.toString());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -123,10 +127,12 @@ public class GoToJewel extends Codelet {
                         try {
 
                             for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
-                                CreatureInnerSense cis = (CreatureInnerSense) innerSenseMO.getI();
-                                Optional<Thing> first = cis.getThingsInWorld().stream().filter(t -> t.getName().equals(soarJewel.getName())).findFirst();
 
-                                if (first.isPresent()) {
+                                List<String> jewelsCollected = Collections.synchronizedList((List<String>) getJewelsCollectedMO().getI());
+
+                                Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
+
+                                if (!first.isPresent()) {
                                     jewelX = soarJewel.getX1();
                                     jewelY = soarJewel.getY1();
                                     break;
@@ -139,10 +145,10 @@ public class GoToJewel extends Codelet {
                             message.put("X", (int) jewelX);
                             message.put("Y", (int) jewelY);
                             message.put("FROMPLAN", true);
-                            message.put("SPEED", creatureBasicSpeed);
+                            message.put("SPEED", getCreatureBasicSpeed());
 
-                            legsMO.setEvaluation(getActivation());
-                            legsMO.setI(message.toString());
+                            getLegsMO().setEvaluation(getActivation());
+                            getLegsMO().setI(message.toString());
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -152,8 +158,8 @@ public class GoToJewel extends Codelet {
                         JSONObject message = new JSONObject();
                         try {
                             message.put("ACTION", "FORAGE");
-                            legsMO.setI(message.toString());
-                            legsMO.setEvaluation(getActivation());
+                            getLegsMO().setI(message.toString());
+                            getLegsMO().setEvaluation(getActivation());
 
                         } catch (JSONException e) {
                             // TODO Auto-generated catch block
@@ -179,5 +185,53 @@ public class GoToJewel extends Codelet {
 
     public void setInnerSenseMO(MemoryObject innerSenseMO) {
         this.innerSenseMO = innerSenseMO;
+    }
+
+    public MemoryObject getKnownJewels() {
+        return knownJewels;
+    }
+
+    public void setKnownJewels(MemoryObject knownJewels) {
+        this.knownJewels = knownJewels;
+    }
+
+    public MemoryObject getLegsMO() {
+        return legsMO;
+    }
+
+    public void setLegsMO(MemoryObject legsMO) {
+        this.legsMO = legsMO;
+    }
+
+    public MemoryObject getDrivesMO() {
+        return drivesMO;
+    }
+
+    public void setDrivesMO(MemoryObject drivesMO) {
+        this.drivesMO = drivesMO;
+    }
+
+    public MemoryObject getPlanSelectedMO() {
+        return planSelectedMO;
+    }
+
+    public void setPlanSelectedMO(MemoryObject planSelectedMO) {
+        this.planSelectedMO = planSelectedMO;
+    }
+
+    public MemoryObject getJewelsCollectedMO() {
+        return jewelsCollectedMO;
+    }
+
+    public void setJewelsCollectedMO(MemoryObject jewelsCollectedMO) {
+        this.jewelsCollectedMO = jewelsCollectedMO;
+    }
+
+    public int getCreatureBasicSpeed() {
+        return creatureBasicSpeed;
+    }
+
+    public void setCreatureBasicSpeed(int creatureBasicSpeed) {
+        this.creatureBasicSpeed = creatureBasicSpeed;
     }
 }

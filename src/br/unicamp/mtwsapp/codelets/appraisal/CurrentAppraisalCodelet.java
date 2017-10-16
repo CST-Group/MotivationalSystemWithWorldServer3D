@@ -79,8 +79,6 @@ public class CurrentAppraisalCodelet extends AppraisalCodelet {
         state = getOutputOV().highestMembershipTerm(getOutputOV().getOutputValue()).getName();
         evaluation = getOutputOV().getOutputValue();
 
-
-
         Appraisal appraisal = new Appraisal(getId(), state, evaluation);
 
         return appraisal;

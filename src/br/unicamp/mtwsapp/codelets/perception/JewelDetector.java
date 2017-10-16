@@ -45,12 +45,9 @@ public class JewelDetector extends Codelet {
 
     @Override
     public synchronized void proc() {
-        List<Thing> vision = null;
-        List<Thing> known = null;
-
         if (getVisionMO().getI() != null && getKnownJewelsMO().getI() != null) {
-            vision = new ArrayList<>(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
-            known = Collections.synchronizedList((List<Thing>) getKnownJewelsMO().getI());
+            List<Thing> vision = new ArrayList<>(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
+            List<Thing> known = Collections.synchronizedList((List<Thing>) getKnownJewelsMO().getI());
 
             if (vision.size() != 0) {
                 Comparator<Thing> comparator = new Comparator<Thing>() {
@@ -60,7 +57,6 @@ public class JewelDetector extends Codelet {
                         return nearThing;
                     }
                 };
-
                 Collections.sort(vision, comparator);
             }
 
@@ -84,15 +80,11 @@ public class JewelDetector extends Codelet {
                             }
                         }
                     }
-
                 }
             } else {
                 known.removeAll(known);
             }
-
-
         }
-
     }// end proc
 
     @Override

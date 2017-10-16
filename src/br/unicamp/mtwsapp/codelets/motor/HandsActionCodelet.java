@@ -64,8 +64,10 @@ public class HandsActionCodelet extends Codelet {
             setVisionMO((MemoryObject) this.getInput("VISION"));
 
 
-        if (getJewelsCollectedMO() == null)
+        if (getJewelsCollectedMO() == null) {
             setJewelsCollectedMO((MemoryObject) this.getOutput("JEWELS_COLLECTED"));
+            getJewelsCollectedMO().setI(jewelsCollected);
+        }
 
 
     }
@@ -82,9 +84,7 @@ public class HandsActionCodelet extends Codelet {
                         String action = jsonAction.getString("ACTION");
                         String objectName = jsonAction.getString("OBJECT");
                         if (action.equals("PICKUP")) {
-
                             try {
-
                                 getC().putInSack(objectName);
                                 getJewelsCollected().add(objectName);
                                 getC().rotate(3);
@@ -93,7 +93,6 @@ public class HandsActionCodelet extends Codelet {
                                 e.printStackTrace();
                             }
                             getLog().info("Sending PUT IN SACK command to agent:****** " + objectName + "**********");
-
                         }
                         if (action.equals("DELIVERY")) {
 
@@ -188,8 +187,8 @@ public class HandsActionCodelet extends Codelet {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                setPreviousHandsAction(command);
             }
-            setPreviousHandsAction(command);
         }
 
         getJewelsCollectedMO().setI(getJewelsCollected());
