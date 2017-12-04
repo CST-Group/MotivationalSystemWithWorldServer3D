@@ -13,12 +13,12 @@ import br.unicamp.cst.core.entities.MemoryObject;
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarPlan;
 import br.unicamp.mtwsapp.codelets.soarplanning.SoarJewel;
-import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ws3dproxy.model.Creature;
@@ -95,80 +95,77 @@ public class GoToJewel extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
-        List<Thing> jewels = Collections.synchronizedList((List<Thing>) getKnownJewels().getI());
+    public void proc() {
+        List<Thing> jewels = new CopyOnWriteArrayList<Thing>((List<Thing>) getKnownJewels().getI());
+
         double jewelX = 0;
         double jewelY = 0;
 
-        synchronized (getLegsMO()) {
-            synchronized (jewels) {
-                Plan plan = (Plan) getPlanSelectedMO().getI();
+        Plan plan = (Plan) getPlanSelectedMO().getI();
 
-                if (!jewels.isEmpty() && plan == null) {
-                    Thing jewel = jewels.get(0);
+        if (!jewels.isEmpty() && plan == null) {
 
-                    jewelX = jewel.getX1();
-                    jewelY = jewel.getY1();
+            jewels.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
+
+            Thing jewel = jewels.get(0);
+
+            jewelX = jewel.getX1();
+            jewelY = jewel.getY1();
+
+            JSONObject message = new JSONObject();
+            try {
+                message.put("ACTION", "GOTO");
+                message.put("X", (int) jewelX);
+                message.put("Y", (int) jewelY);
+                message.put("SPEED", getCreatureBasicSpeed());
+
+                getLegsMO().setEvaluation(getActivation());
+                getLegsMO().setI(message.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (plan != null) {
+                try {
+
+                    for (SoarJewel soarJewel : ((SoarPlan) plan.getContent()).getSoarJewels()) {
+
+                        if (soarJewel.getCaptured() == 0) {
+                            jewelX = soarJewel.getX1();
+                            jewelY = soarJewel.getY1();
+                            break;
+                        }
+                    }
 
                     JSONObject message = new JSONObject();
-                    try {
-                        message.put("ACTION", "GOTO");
-                        message.put("X", (int) jewelX);
-                        message.put("Y", (int) jewelY);
-                        message.put("SPEED", getCreatureBasicSpeed());
 
-                        getLegsMO().setEvaluation(getActivation());
-                        getLegsMO().setI(message.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    if (plan != null) {
-                        try {
+                    message.put("ACTION", "GOTO");
+                    message.put("X", (int) jewelX);
+                    message.put("Y", (int) jewelY);
+                    message.put("FROMPLAN", true);
+                    message.put("SPEED", getCreatureBasicSpeed());
 
-                            for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
+                    getLegsMO().setEvaluation(getActivation());
+                    getLegsMO().setI(message.toString());
 
-                                List<String> jewelsCollected = Collections.synchronizedList((List<String>) getJewelsCollectedMO().getI());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
 
-                                Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
+                JSONObject message = new JSONObject();
+                try {
+                    message.put("ACTION", "FORAGE");
+                    getLegsMO().setI(message.toString());
+                    getLegsMO().setEvaluation(getActivation());
 
-                                if (!first.isPresent()) {
-                                    jewelX = soarJewel.getX1();
-                                    jewelY = soarJewel.getY1();
-                                    break;
-                                }
-                            }
-
-                            JSONObject message = new JSONObject();
-
-                            message.put("ACTION", "GOTO");
-                            message.put("X", (int) jewelX);
-                            message.put("Y", (int) jewelY);
-                            message.put("FROMPLAN", true);
-                            message.put("SPEED", getCreatureBasicSpeed());
-
-                            getLegsMO().setEvaluation(getActivation());
-                            getLegsMO().setI(message.toString());
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-
-                        JSONObject message = new JSONObject();
-                        try {
-                            message.put("ACTION", "FORAGE");
-                            getLegsMO().setI(message.toString());
-                            getLegsMO().setEvaluation(getActivation());
-
-                        } catch (JSONException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         }
+
+
     }
 
     public Creature getCreature() {

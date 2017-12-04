@@ -76,7 +76,7 @@ public class AvoidColisionObstacle extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
         String obstacleName = "";
         closestObstacle = (Thing) closestObstacleMO.getI();
 

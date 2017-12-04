@@ -7,6 +7,7 @@ public class SoarJewel {
     public double y1;
     public double distance;
     public double score;
+    public double captured;
 
     public String getName() {
         return name;
@@ -54,5 +55,13 @@ public class SoarJewel {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public double getCaptured() {
+        return captured;
+    }
+
+    public void setCaptured(double captured) {
+        this.captured = captured;
     }
 }

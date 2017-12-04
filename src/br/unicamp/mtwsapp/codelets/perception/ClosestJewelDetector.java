@@ -7,7 +7,9 @@ package br.unicamp.mtwsapp.codelets.perception;
 
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
+
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -15,7 +17,6 @@ import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
 /**
- *
  * @author Du
  */
 public class ClosestJewelDetector extends Codelet {
@@ -24,7 +25,6 @@ public class ClosestJewelDetector extends Codelet {
     private MemoryObject closestJewelMO;
     private MemoryObject innerSenseMO;
 
-    private List<Thing> known;
     private final int reachDistance;
     private final Creature creature;
 
@@ -36,52 +36,50 @@ public class ClosestJewelDetector extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if(getKnownMO() ==null)
+        if (getKnownMO() == null)
             this.setKnownMO((MemoryObject) this.getInput("KNOWN_JEWELS"));
 
-        if(getInnerSenseMO() == null)
+        if (getInnerSenseMO() == null)
             this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
 
-        if(getClosestJewelMO() ==null)
+        if (getClosestJewelMO() == null)
             this.setClosestJewelMO((MemoryObject) this.getOutput("CLOSEST_JEWEL"));
     }
 
     @Override
-    public synchronized void proc() {
-        Thing closest_jewel = null;
-        setKnown(Collections.synchronizedList((List<Thing>) getKnownMO().getI()));
-        synchronized (getKnown()) {
-            if (!getKnown().isEmpty()) {
-                //Iterate over objects in vision, looking for the closest apple
-                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
-                for (Thing t : myknown) {
-                    String objectName = t.getName();
-                    if (objectName.contains("Jewel")) {
+    public void proc() {
+        Thing closestJewel = null;
 
-                        double Dnew = getCreature().calculateDistanceTo(t);
+        List<Thing> jewels = new CopyOnWriteArrayList<Thing>((List<Thing>) getKnownMO().getI());
 
-                        if (Dnew <= getReachDistance()) {
-                            closest_jewel = t;
-                        }
+        if(jewels != null) {
+            if (jewels.size() > 0) {
 
-                    }
+                jewels.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
+
+                Thing jewel = jewels.get(0);
+                double dNew = getCreature().calculateDistanceTo(jewel);
+
+                if (dNew <= getReachDistance()) {
+                    closestJewel = jewel;
                 }
 
-                if (closest_jewel != null) {
-                    if (getClosestJewelMO().getI() == null || !getClosestJewelMO().getI().equals(closest_jewel)) {
-                        getClosestJewelMO().setI(closest_jewel);
+                if (closestJewel != null) {
+                    if (getClosestJewelMO().getI() == null || !getClosestJewelMO().getI().equals(closestJewel)) {
+                        getClosestJewelMO().setI(closestJewel);
                     }
 
                 } else {
-                    //couldn't find any nearby apples
-                    closest_jewel = null;
-                    getClosestJewelMO().setI(closest_jewel);
+
+                    closestJewel = null;
+                    getClosestJewelMO().setI(closestJewel);
                 }
-            } else { // if there are no known apples closest_apple must be null
-                closest_jewel = null;
-                getClosestJewelMO().setI(closest_jewel);
+            } else {
+                closestJewel = null;
+                getClosestJewelMO().setI(closestJewel);
             }
         }
+
     }//end proc
 
     @Override
@@ -114,13 +112,6 @@ public class ClosestJewelDetector extends Codelet {
         this.innerSenseMO = innerSenseMO;
     }
 
-    public List<Thing> getKnown() {
-        return known;
-    }
-
-    public void setKnown(List<Thing> known) {
-        this.known = known;
-    }
 
     public int getReachDistance() {
         return reachDistance;

@@ -26,7 +26,7 @@ public class BoredomMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public synchronized double calculateSimpleActivation(List<Memory> sensorMOs) {
+    public double calculateSimpleActivation(List<Memory> sensorMOs) {
 
         double activation = 0;
 

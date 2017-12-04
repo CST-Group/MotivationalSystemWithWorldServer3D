@@ -28,16 +28,9 @@ public class Environment {
 
             Random rand = new Random();
 
-            World.createFood(rand.nextInt(2), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
-            World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
+            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
+            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
+            World.createFood(0, rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));
             World.createJewel(rand.nextInt(6), rand.nextInt(width), rand.nextInt(height));

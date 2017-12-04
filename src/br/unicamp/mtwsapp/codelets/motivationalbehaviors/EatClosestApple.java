@@ -73,7 +73,7 @@ public class EatClosestApple extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
         String appleName = "";
         closestApple = (Thing) closestAppleMO.getI();
         cis = (CreatureInnerSense) innerSenseMO.getI();

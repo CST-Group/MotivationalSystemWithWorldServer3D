@@ -19,7 +19,7 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
         double closestActivation = 0;
         double obstacleStimulus = 0;
@@ -32,7 +32,7 @@ public class AvoidDangerMotivationalCodelet extends MotivationalCodelet {
                 if (closestObstacle.getI() == "")
                     closestActivation = 0;
                 else
-                    closestActivation = 0.8;
+                    closestActivation = 0.7;
             }
         }
 

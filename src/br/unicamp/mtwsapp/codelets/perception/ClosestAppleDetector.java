@@ -4,13 +4,14 @@ import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
 
 /**
- *
  * @author Du
  */
 public class ClosestAppleDetector extends Codelet {
@@ -19,7 +20,6 @@ public class ClosestAppleDetector extends Codelet {
     private MemoryObject closestAppleMO;
     private MemoryObject innerSenseMO;
 
-    private List<Thing> known;
     private final int reachDistance;
     private final Creature creature;
 
@@ -32,55 +32,52 @@ public class ClosestAppleDetector extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if(getKnownMO() ==null)
+        if (getKnownMO() == null)
             this.setKnownMO((MemoryObject) this.getInput("KNOWN_APPLES"));
 
-        if(getInnerSenseMO() ==null)
+        if (getInnerSenseMO() == null)
             this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
 
-        if(getClosestAppleMO() ==null)
+        if (getClosestAppleMO() == null)
             this.setClosestAppleMO((MemoryObject) this.getOutput("CLOSEST_APPLE"));
 
 
     }
 
     @Override
-    public synchronized void proc() {
-        Thing closest_apple = null;
-        setKnown(Collections.synchronizedList((List<Thing>) getKnownMO().getI()));
+    public void proc() {
+        Thing closestFood = null;
 
-        synchronized (getKnown()) {
-            if (getKnown().size() != 0) {
-                //Iterate over objects in vision, looking for the closest a pple
-                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
-                for (Thing t : myknown) {
-                    String objectName = t.getName();
-                    if (objectName.contains("PFood") || objectName.contains("NPFood")) {
+        List<Thing> apples = new CopyOnWriteArrayList<Thing>((List<Thing>) getKnownMO().getI());
 
-                        double Dnew = getCreature().calculateDistanceTo(t);
+        if(apples != null) {
+            if (apples.size() != 0) {
 
-                        if (Dnew <= getReachDistance()) {
-                            closest_apple = t;
-                        }
+                apples.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
 
-                    }
+                Thing food = apples.get(0);
+                double dNew = getCreature().calculateDistanceTo(food);
+
+                if (dNew <= getReachDistance()) {
+                    closestFood = food;
                 }
 
-                if (closest_apple != null) {
-                    if (getClosestAppleMO().getI() == null || !getClosestAppleMO().getI().equals(closest_apple)) {
-                        getClosestAppleMO().setI(closest_apple);
+                if (closestFood != null) {
+                    if (getClosestAppleMO().getI() == null || !getClosestAppleMO().getI().equals(closestFood)) {
+                        getClosestAppleMO().setI(closestFood);
                     }
 
                 } else {
                     //couldn't find any nearby apples
-                    closest_apple = null;
-                    getClosestAppleMO().setI(closest_apple);
+                    closestFood = null;
+                    getClosestAppleMO().setI(closestFood);
                 }
-            } else { // if there are no known apples closest_apple must be null
-                closest_apple = null;
-                getClosestAppleMO().setI(closest_apple);
+            } else {
+                closestFood = null;
+                getClosestAppleMO().setI(closestFood);
             }
         }
+
     }//end proc
 
     @Override
@@ -111,14 +108,6 @@ public class ClosestAppleDetector extends Codelet {
 
     public void setInnerSenseMO(MemoryObject innerSenseMO) {
         this.innerSenseMO = innerSenseMO;
-    }
-
-    public List<Thing> getKnown() {
-        return known;
-    }
-
-    public void setKnown(List<Thing> known) {
-        this.known = known;
     }
 
     public int getReachDistance() {

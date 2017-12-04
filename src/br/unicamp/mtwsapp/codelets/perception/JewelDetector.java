@@ -8,11 +8,9 @@ package br.unicamp.mtwsapp.codelets.perception;
 import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Leaflet;
@@ -44,46 +42,30 @@ public class JewelDetector extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
         if (getVisionMO().getI() != null && getKnownJewelsMO().getI() != null) {
-            List<Thing> vision = new ArrayList<>(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
-            List<Thing> known = Collections.synchronizedList((List<Thing>) getKnownJewelsMO().getI());
 
-            if (vision.size() != 0) {
-                Comparator<Thing> comparator = new Comparator<Thing>() {
-                    @Override
-                    public int compare(Thing thing1, Thing thing2) {
-                        int nearThing = getCreature().calculateDistanceTo(thing2) < getCreature().calculateDistanceTo(thing1) ? 1 : 0;
-                        return nearThing;
-                    }
-                };
-                Collections.sort(vision, comparator);
-            }
+            CopyOnWriteArrayList<Thing> vision = new CopyOnWriteArrayList<>((List<Thing>) getVisionMO().getI());
+            List<Thing> objects = new ArrayList<>();
+
+            vision.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
 
             if (vision.size() != 0) {
                 for (Thing t : vision) {
-                    boolean found = false;
-                    synchronized (known) {
-                        CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
-                        for (Thing e : myknown) {
-                            if (t.getName().equals(e.getName())) {
-                                found = true;
+                    if(t.getName().contains("Jewel")) {
+                        for (Leaflet leaflet : getCreature().getLeaflets()) {
+                            if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
+                                objects.add(t);
                                 break;
-                            }
-                        }
-                        if (found == false && t.getName().contains("Jewel")) {
-                            for (Leaflet leaflet : getCreature().getLeaflets()) {
-                                if (leaflet.ifInLeaflet(t.getMaterial().getColorName())) {
-                                    known.add(t);
-                                    break;
-                                }
                             }
                         }
                     }
                 }
-            } else {
-                known.removeAll(known);
             }
+
+            getKnownJewelsMO().setI(objects);
+        } else {
+            getKnownJewelsMO().setI(new ArrayList<>());
         }
     }// end proc
 

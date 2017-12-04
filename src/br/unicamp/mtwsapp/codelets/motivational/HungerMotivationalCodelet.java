@@ -19,7 +19,7 @@ public class HungerMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
         Memory cisMO = sensorsMemory.get(0);
         CreatureInnerSense cis = (CreatureInnerSense) cisMO.getI();
@@ -39,8 +39,10 @@ public class HungerMotivationalCodelet extends MotivationalCodelet {
         }
         double foodDeficit = 1 - (cis.getFuel() / 1000);
 
-        double activation = 0.95 * Math.max(foodDeficit, foodDeficit * (1 + foodsStimulus));
+        double activation = 0;
 
+        if(foodsStimulus > 0)
+            activation = 0.95 * Math.max(foodDeficit, foodDeficit * (1 + foodsStimulus));
 
         if(activation > 1)
             activation = 1;

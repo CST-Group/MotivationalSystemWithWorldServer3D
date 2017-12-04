@@ -144,9 +144,10 @@ sp {apply*move*jewel
    (<newJewel>  ^y1 <y1>)
    (<newJewel>  ^distance <distance>)
    (<newJewel>  ^score <score>)
+   (<newJewel>  ^captured 0)
 }
 
-sp {monitoring*desire*state
+sp {propose*monitoring*desire*state
    (state <s> ^smem.command <cmd>)
    (<cmd> ^plans <plans>)
    (<plans> ^index <index>)

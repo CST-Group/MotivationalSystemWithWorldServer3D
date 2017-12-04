@@ -35,7 +35,7 @@ public class RandomMove extends Codelet {
     }
 
     @Override
-    public synchronized void calculateActivation() {
+    public void calculateActivation() {
 
             Drive drive = (Drive) drivesMO.getI();
             try {

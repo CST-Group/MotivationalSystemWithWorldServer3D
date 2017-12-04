@@ -11,6 +11,7 @@ import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.Thing;
@@ -23,12 +24,14 @@ public class GoToApple extends Codelet {
     private MemoryObject knownApplesMO;
     private MemoryObject drivesMO;
     private MemoryObject legsMO;
+    private Creature creature;
 
     private int creatureBasicSpeed;
 
-    public GoToApple(String name, int creatureBasicSpeed) {
+    public GoToApple(String name, int creatureBasicSpeed, Creature creature) {
         this.setName(name);
         this.creatureBasicSpeed = creatureBasicSpeed;
+        setCreature(creature);
     }
 
     @Override
@@ -62,15 +65,19 @@ public class GoToApple extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
 
-        List<Thing> apples = Collections.synchronizedList((List<Thing>) knownApplesMO.getI());
+        if (knownApplesMO.getI() != null) {
 
-        synchronized (legsMO) {
-            synchronized (apples) {
-                if (!apples.isEmpty()) {
+            List<Thing> apples = new CopyOnWriteArrayList<Thing>((List<Thing>) knownApplesMO.getI());
+
+            if (apples != null) {
+                if (apples.size() > 0) {
+
+                    apples.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
                     double appleX = 0;
                     double appleY = 0;
+
                     try {
                         appleX = apples.get(0).getX1();
                         appleY = apples.get(0).getY1();
@@ -106,6 +113,14 @@ public class GoToApple extends Codelet {
             }
         }
 
+
     }
 
+    public Creature getCreature() {
+        return creature;
+    }
+
+    public void setCreature(Creature creature) {
+        this.creature = creature;
+    }
 }

@@ -38,55 +38,41 @@ public class AppleDetector extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
-        List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
-        List<Thing> known = Collections.synchronizedList((List<Thing>) getKnownApplesMO().getI());;
+    public void proc() {
+        if ((getVisionMO().getI() != null && getKnownApplesMO().getI() != null)) {
 
-        if (vision.size() != 0) {
-            Comparator<Thing> comparator = new Comparator<Thing>() {
-                @Override
-                public int compare(Thing thing1, Thing thing2) {
-                    int nearThing = getCreature().calculateDistanceTo(thing2) < getCreature().calculateDistanceTo(thing1) ? 1 : 0;
-                    return nearThing;
-                }
-            };
+            List<Thing> vision = new CopyOnWriteArrayList<>((List<Thing>) getVisionMO().getI());
+            List<Thing> objects = new ArrayList<>();
 
-            Collections.sort(vision, comparator);
-        }
+            vision.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
 
-        //known = new CopyOnWriteArrayList((List<Thing>) knownApplesMO.getI());
-
-        if (vision.size() != 0) {
-            for (Thing t : vision) {
-                boolean found = false;
-                synchronized (known) {
-                    CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(known);
-                    for (Thing e : myknown) {
-                        if (t.getName().equals(e.getName())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found == false && t.getName().contains("Food")) {
-                        known.add(t);
+            if (vision.size() != 0) {
+                for (Thing t : vision) {
+                    if (t.getName().contains("Food")) {
+                        objects.add(t);
                     }
                 }
-
             }
+
+            if(getHiddenObjectsMO().getI() != null) {
+                List<Thing> hiddenThings = (List<Thing>) getHiddenObjectsMO().getI();
+                objects.addAll(hiddenThings);
+            }
+
+            getKnownApplesMO().setI(objects);
+
         } else {
-            known.removeAll(known);
+            if(getHiddenObjectsMO().getI() != null) {
+                List<Thing> objects = new ArrayList<>();
+                List<Thing> hiddenThings = (List<Thing>) getHiddenObjectsMO().getI();
+                objects.addAll(hiddenThings);
+                getKnownApplesMO().setI(objects);
+            } else {
+                getKnownApplesMO().setI(new ArrayList<>());
+            }
         }
 
-        List<Thing> hiddenThings = (List<Thing>) getHiddenObjectsMO().getI();
-
-        for (Thing thing : hiddenThings) {
-            if (!known.stream().anyMatch(x -> x.getName().equals(thing.getName())))
-                known.add(thing);
-        }
-
-        getKnownApplesMO().setI(known);
-
-    }// end proc
+    }
 
     @Override
     public void calculateActivation() {

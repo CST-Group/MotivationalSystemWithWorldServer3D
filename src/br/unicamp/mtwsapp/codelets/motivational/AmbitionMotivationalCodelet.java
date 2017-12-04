@@ -27,7 +27,7 @@ public class AmbitionMotivationalCodelet extends MotivationalCodelet {
     }
 
     @Override
-    public synchronized double calculateSimpleActivation(List<Memory> sensorsMemory) {
+    public double calculateSimpleActivation(List<Memory> sensorsMemory) {
 
 
         //double diff = ((new Date()).getTime() - initDate.getTime())/60000;

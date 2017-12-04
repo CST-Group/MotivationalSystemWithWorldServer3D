@@ -19,6 +19,7 @@
 
 package br.unicamp.mtwsapp.support;
 
+import br.unicamp.cst.bindings.soar.Plan;
 import br.unicamp.cst.core.entities.MemoryObject;
 
 import java.io.BufferedWriter;
@@ -29,11 +30,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import br.unicamp.cst.motivational.Drive;
-import br.unicamp.cst.motivational.MotivationalCodelet;
+import br.unicamp.cst.motivational.*;
 import br.unicamp.mtwsapp.application.AgentMind;
 import br.unicamp.mtwsapp.memory.CreatureInnerSense;
 import com.google.gson.Gson;
+import ws3dproxy.CommandExecException;
 import ws3dproxy.model.Creature;
 import ws3dproxy.model.World;
 
@@ -44,6 +45,8 @@ public class SimulationController {
 
     private Timer t;
     private List<MemoryObject> mol = new ArrayList<>();
+
+    private MemoryObject plansSetMO;
 
     private Random r;
 
@@ -59,10 +62,20 @@ public class SimulationController {
     private File fileEnergySpent;
     private File fileCreatureScore;
     private File fileDrivesActivation;
+    private File filePlansCreated;
+    private File filePlansExecuted;
+    private File fileMoodsValues;
+    private File fileEmotionalActivation;
+    private File fileAppraisalEvals;
 
     private List<Result> resultEnergySpent;
     private List<Result> resultDrivesActivation;
     private List<Result> resultCreatureScore;
+    private List<Result> resultPlansCreated;
+    private List<Result> resultPlansExecuted;
+    private List<Result> resultMoodsValues;
+    private List<Result> resultEmotionalActivation;
+    private List<Result> resultAppraisalEvals;
 
 
 
@@ -71,10 +84,20 @@ public class SimulationController {
         setResultEnergySpent(new ArrayList<>());
         setResultDrivesActivation(new ArrayList<>());
         setResultCreatureScore(new ArrayList<>());
+        setResultPlansCreated(new ArrayList<>());
+        setResultPlansExecuted(new ArrayList<>());
+        setResultAppraisalEvals(new ArrayList<>());
+        setResultMoodsValues(new ArrayList<>());
+        setResultEmotionalActivation(new ArrayList<>());
         setR(new Random());
         setFileEnergySpent(new File("reportFiles/MotivationalSystem_EnergySpent" + timeLog + ".txt"));
         setFileCreatureScore(new File("reportFiles/MotivationalSystem_Score" + timeLog + ".txt"));
         setFileDrivesActivation(new File("reportFiles/MotivationalSystem_DrivesActivation" + timeLog + ".txt"));
+        setFilePlansCreated(new File("reportFiles/MotivationalSystem_PlansCreated" + timeLog + ".txt"));
+        setFilePlansExecuted(new File("reportFiles/MotivationalSystem_PlansExecuted" + timeLog + ".txt"));
+        setFileAppraisalEvals(new File("reportFiles/MotivationalSystem_AppraisalEvals" + timeLog + ".txt"));
+        setFileEmotionalActivation(new File("reportFiles/MotivationalSystem_EmotionalActivation" + timeLog + ".txt"));
+        setFileMoodsValues(new File("reportFiles/MotivationalSystem_MoodsValues" + timeLog + ".txt"));
         setInitDate(new Date());
 
     }
@@ -101,29 +124,43 @@ public class SimulationController {
         getT().scheduleAtFixedRate(tt, 0, 1000);
     }
 
-    public synchronized void tick() {
+    public void tick() {
 
-        if ((getCounterToGenerateThings() /60) == 1) {
+        if ((getCounterToGenerateThings() / 60) >= 1) {
             createObjectsInWorld();
+            createFoodsInWorld();
             setCounterToGenerateThings(0);
         }
 
         reportEnergySpent(getTime());
         reportDrivesActivation(getTime());
         reportCreatureScore(getTime());
+        reportPlansCreated(getTime());
+        reportPlansExecuted(getTime());
+        reportAppraisalEvals(getTime());
+        reportMoodsValue(getTime());
+        reportEmotionalActivation(getTime());
 
-        if((getTime() /60) == getDefaultTime()){
+        if((getTime() / 60) == getDefaultTime()){
             finalizeReport("Creature's Energy", "Time", "Energy", getResultEnergySpent(), getFileEnergySpent());
             finalizeReport("Creature's Score", "Time", "Score", getResultCreatureScore(), getFileCreatureScore());
             finalizeReport("Creature's Drives", "Time", "Activation", getResultDrivesActivation(), getFileDrivesActivation());
+            finalizeReport("Creature's Plans Created", "Time", "Number Of Plans", getResultPlansCreated(), getFilePlansCreated());
+            finalizeReport("Creature's Plans Executed", "Time", "Number Of Plans", getResultPlansExecuted(), getFilePlansExecuted());
+            finalizeReport("Creature's Appraisal Evaluation", "Time", "Evaluation", getResultAppraisalEvals(), getFileAppraisalEvals());
+            finalizeReport("Creature's Emotional Distortion", "Time", "Activation", getResultEmotionalActivation(), getFileEmotionalActivation());
+            finalizeReport("Creature's Moods Values", "Time", "Values", getResultMoodsValues(), getFileMoodsValues());
             getT().cancel();
             getT().purge();
             getAgentMind().shutDown();
+            System.exit(1);
         }
 
         setCounterToGenerateThings(getCounterToGenerateThings() + 1);
         setTime(getTime() + 1);
     }
+
+
 
     private void createObjectsInWorld(){
         try {
@@ -131,11 +168,18 @@ public class SimulationController {
             World.createJewel(random.nextInt(6), getR().nextInt(800), getR().nextInt(600));
             World.createJewel(random.nextInt(6), getR().nextInt(800), getR().nextInt(600));
             World.createJewel(random.nextInt(6), getR().nextInt(800), getR().nextInt(600));
-            World.createFood(random.nextInt(2), getR().nextInt(800), getR().nextInt(600));
-            World.createFood(random.nextInt(2), getR().nextInt(800), getR().nextInt(600));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void createFoodsInWorld(){
+        try {
+            World.createFood(0, getR().nextInt(800), getR().nextInt(600));
+        } catch (CommandExecException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private boolean checkTimeStop() {
@@ -149,6 +193,33 @@ public class SimulationController {
         return bFinish;
     }
 
+    private void reportEmotionalActivation(double time) {
+        List<MemoryObject> drivesMO = getMol().stream().filter(d -> d.getName() == MotivationalCodelet.OUTPUT_DRIVE_MEMORY).collect(Collectors.toList());
+        drivesMO.stream().forEach(driveMO -> {
+            if(driveMO.getI() != null) {
+                this.getResultEmotionalActivation().add(new Result(((Drive)driveMO.getI()).getName(), time, ((Drive)driveMO.getI()).getEmotionalDistortion()));
+            }
+        });
+    }
+
+    private void reportMoodsValue(double time) {
+        List<MemoryObject> moodsMO = getMol().stream().filter(d -> d.getName() == MoodCodelet.OUTPUT_MOOD_MEMORY).collect(Collectors.toList());
+        moodsMO.stream().forEach(moodMO -> {
+            if(moodMO.getI() != null) {
+                this.getResultMoodsValues().add(new Result(((Mood)moodMO.getI()).getName(), time, ((Mood)moodMO.getI()).getValue()));
+            }
+        });
+    }
+
+    private void reportAppraisalEvals(double time) {
+        List<MemoryObject> appraisalsMO = getMol().stream().filter(d -> d.getName() == AppraisalCodelet.OUTPUT_APPRAISAL_MEMORY).collect(Collectors.toList());
+        appraisalsMO.stream().forEach(appraisalMO -> {
+            if(appraisalMO.getI() != null) {
+                this.getResultAppraisalEvals().add(new Result("Appraisal Evaluation", time, ((Appraisal)appraisalMO.getI()).getEvaluation()));
+            }
+        });
+    }
+
     private void reportEnergySpent(double time) {
         this.getResultEnergySpent().add(new Result("Energy Spent", time, getCreature().getFuel()));
     }
@@ -160,6 +231,23 @@ public class SimulationController {
                 this.getResultDrivesActivation().add(new Result(((Drive) (driveMO.getI())).getName(), time, driveMO.getEvaluation()));
             }
         });
+    }
+
+    private void reportPlansCreated(double time){
+
+        HashMap<Integer, Plan> plans = (HashMap<Integer, Plan>) plansSetMO.getI();
+
+        getResultPlansCreated().add(new Result("Plans Created", time, plans.size()));
+    }
+
+    private void reportPlansExecuted(double time){
+
+        HashMap<Integer, Plan> plans = (HashMap<Integer, Plan>) plansSetMO.getI();
+
+        List<Plan> plansExecuted = plans.entrySet().stream().filter(x -> x.getValue().isFinished() == true).map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        getResultPlansExecuted().add(new Result("Plans Executed", time, plansExecuted.size()));
     }
 
     private void reportCreatureScore(double time) {
@@ -308,5 +396,93 @@ public class SimulationController {
 
     public void setCreatureInnerSenseMO(MemoryObject creatureInnerSenseMO) {
         this.creatureInnerSenseMO = creatureInnerSenseMO;
+    }
+
+    public File getFilePlansCreated() {
+        return filePlansCreated;
+    }
+
+    public void setFilePlansCreated(File filePlansCreated) {
+        this.filePlansCreated = filePlansCreated;
+    }
+
+    public File getFilePlansExecuted() {
+        return filePlansExecuted;
+    }
+
+    public void setFilePlansExecuted(File filePlansExecuted) {
+        this.filePlansExecuted = filePlansExecuted;
+    }
+
+    public List<Result> getResultPlansCreated() {
+        return resultPlansCreated;
+    }
+
+    public void setResultPlansCreated(List<Result> resultPlansCreated) {
+        this.resultPlansCreated = resultPlansCreated;
+    }
+
+    public List<Result> getResultPlansExecuted() {
+        return resultPlansExecuted;
+    }
+
+    public void setResultPlansExecuted(List<Result> resultPlansExecuted) {
+        this.resultPlansExecuted = resultPlansExecuted;
+    }
+
+    public MemoryObject getPlansSetMO() {
+        return plansSetMO;
+    }
+
+    public void setPlansSetMO(MemoryObject plansSetMO) {
+        this.plansSetMO = plansSetMO;
+    }
+
+    public File getFileMoodsValues() {
+        return fileMoodsValues;
+    }
+
+    public void setFileMoodsValues(File fileMoodsValues) {
+        this.fileMoodsValues = fileMoodsValues;
+    }
+
+    public File getFileEmotionalActivation() {
+        return fileEmotionalActivation;
+    }
+
+    public void setFileEmotionalActivation(File fileEmotionalActivation) {
+        this.fileEmotionalActivation = fileEmotionalActivation;
+    }
+
+    public File getFileAppraisalEvals() {
+        return fileAppraisalEvals;
+    }
+
+    public void setFileAppraisalEvals(File fileAppraisalEvals) {
+        this.fileAppraisalEvals = fileAppraisalEvals;
+    }
+
+    public List<Result> getResultMoodsValues() {
+        return resultMoodsValues;
+    }
+
+    public void setResultMoodsValues(List<Result> resultMoodsValues) {
+        this.resultMoodsValues = resultMoodsValues;
+    }
+
+    public List<Result> getResultEmotionalActivation() {
+        return resultEmotionalActivation;
+    }
+
+    public void setResultEmotionalActivation(List<Result> resultEmotionalActivation) {
+        this.resultEmotionalActivation = resultEmotionalActivation;
+    }
+
+    public List<Result> getResultAppraisalEvals() {
+        return resultAppraisalEvals;
+    }
+
+    public void setResultAppraisalEvals(List<Result> resultAppraisalEvals) {
+        this.resultAppraisalEvals = resultAppraisalEvals;
     }
 }

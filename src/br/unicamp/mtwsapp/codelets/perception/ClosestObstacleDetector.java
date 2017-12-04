@@ -9,6 +9,7 @@ import br.unicamp.cst.core.entities.Codelet;
 import br.unicamp.cst.core.entities.MemoryObject;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,11 +22,9 @@ import ws3dproxy.model.Thing;
  * @author Du
  */
 public class ClosestObstacleDetector extends Codelet {
-    private MemoryObject visionMO;
+    private MemoryObject knownObstaclesMO;
     private MemoryObject closestObstacleMO;
-    private MemoryObject innerSenseMO;
 
-    private List<Thing> known;
     private final Creature creature;
     private final int reachDistance;
 
@@ -37,54 +36,50 @@ public class ClosestObstacleDetector extends Codelet {
 
     @Override
     public void accessMemoryObjects() {
-        if (getVisionMO() == null)
-            this.setVisionMO((MemoryObject) this.getInput("VISION"));
 
-        if (getInnerSenseMO() == null)
-            this.setInnerSenseMO((MemoryObject) this.getInput("INNER"));
+        if (getKnownObstaclesMO() == null)
+            this.setKnownObstaclesMO((MemoryObject) this.getInput("KNOWN_OBSTACLES"));
 
         if (getClosestObstacleMO() == null)
             this.setClosestObstacleMO((MemoryObject) this.getOutput("CLOSEST_OBSTACLE"));
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
 
-        boolean isFound = false;
+        Thing closestObstacle = null;
 
-        setKnown(Collections.synchronizedList((List<Thing>) getVisionMO().getI()));
+        List<Thing> obstacles = new CopyOnWriteArrayList<Thing>((List<Thing>) knownObstaclesMO.getI());
 
-        synchronized (getKnown()) {
-            if (!getKnown().isEmpty()) {
+        if(obstacles != null) {
+            if (obstacles.size() != 0) {
 
-                CopyOnWriteArrayList<Thing> myknown = new CopyOnWriteArrayList<>(getKnown());
+                obstacles.sort(Comparator.comparing(a -> getCreature().calculateDistanceTo(a)));
 
-                for (Thing t : myknown) {
+                Thing obstacle = obstacles.get(0);
 
-                    if (t.getName().contains("DeliverySpot")) {
-                        double distanceTo = getCreature().calculateDistanceTo(t);
-                        if (distanceTo <= (reachDistance + 25)) {
-                            getClosestObstacleMO().setI(t);
-                            isFound = true;
-                            break;
-                        }
-                    } else {
-                        if (isNear(t, reachDistance) != null) {
-                            getClosestObstacleMO().setI(t);
-                            isFound = true;
-                            break;
-                        }
-                    }
+                Thing thing = isNear(obstacle, getReachDistance());
 
+                if (thing != null) {
+                    closestObstacle = obstacle;
                 }
 
-                if (isFound == false)
-                    getClosestObstacleMO().setI(null);
+                if (closestObstacle != null) {
+                    if (getClosestObstacleMO().getI() == null || !getClosestObstacleMO().getI().equals(closestObstacle)) {
+                        getClosestObstacleMO().setI(closestObstacle);
+                    }
 
+                } else {
+
+                    closestObstacle = null;
+                    getClosestObstacleMO().setI(closestObstacle);
+                }
             } else {
-                getClosestObstacleMO().setI(null);
+                closestObstacle = null;
+                getClosestObstacleMO().setI(closestObstacle);
             }
         }
+
     }//end proc
 
     public Thing isNear(Thing thing, double gap) {
@@ -108,14 +103,6 @@ public class ClosestObstacleDetector extends Codelet {
     }
 
 
-    public MemoryObject getVisionMO() {
-        return visionMO;
-    }
-
-    public void setVisionMO(MemoryObject visionMO) {
-        this.visionMO = visionMO;
-    }
-
     public MemoryObject getClosestObstacleMO() {
         return closestObstacleMO;
     }
@@ -124,27 +111,19 @@ public class ClosestObstacleDetector extends Codelet {
         this.closestObstacleMO = closestObstacleMO;
     }
 
-    public MemoryObject getInnerSenseMO() {
-        return innerSenseMO;
-    }
-
-    public void setInnerSenseMO(MemoryObject innerSenseMO) {
-        this.innerSenseMO = innerSenseMO;
-    }
-
-    public List<Thing> getKnown() {
-        return known;
-    }
-
-    public void setKnown(List<Thing> known) {
-        this.known = known;
-    }
-
     public Creature getCreature() {
         return creature;
     }
 
     public int getReachDistance() {
         return reachDistance;
+    }
+
+    public MemoryObject getKnownObstaclesMO() {
+        return knownObstaclesMO;
+    }
+
+    public void setKnownObstaclesMO(MemoryObject knownObstaclesMO) {
+        this.knownObstaclesMO = knownObstaclesMO;
     }
 }

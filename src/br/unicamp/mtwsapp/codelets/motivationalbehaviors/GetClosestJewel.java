@@ -13,9 +13,6 @@ import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import br.unicamp.cst.motivational.Drive;
 import br.unicamp.cst.motivational.MotivationalCodelet;
@@ -99,7 +96,7 @@ public class GetClosestJewel extends Codelet {
     }
 
     @Override
-    public synchronized void proc() {
+    public void proc() {
         String jewelName = "";
         setClosestJewel((Thing) getClosestJewelMO().getI());
         setCis((CreatureInnerSense) getInnerSenseMO().getI());
@@ -112,13 +109,9 @@ public class GetClosestJewel extends Codelet {
                 Plan plan = (Plan) getPlanSelectedMO().getI();
                 if (plan != null) {
 
-                    for (SoarJewel soarJewel : ((SoarPlan)plan.getContent()).getSoarJewels()) {
+                    for (SoarJewel soarJewel : ((SoarPlan) plan.getContent()).getSoarJewels()) {
 
-                        List<String> jewelsCollected = Collections.synchronizedList((List<String>) getJewelsCollectedMO().getI());
-
-                        Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
-
-                        if (!first.isPresent()) {
+                        if (soarJewel.getCaptured() == 0) {
                             jewelX = soarJewel.getX1();
                             jewelY = soarJewel.getY1();
                             break;

@@ -85,9 +85,10 @@ public class HandsActionCodelet extends Codelet {
                         String objectName = jsonAction.getString("OBJECT");
                         if (action.equals("PICKUP")) {
                             try {
+                                getC().rotate(3);
                                 getC().putInSack(objectName);
                                 getJewelsCollected().add(objectName);
-                                getC().rotate(3);
+
 
                             } catch (CommandExecException e) {
                                 e.printStackTrace();
@@ -129,7 +130,7 @@ public class HandsActionCodelet extends Codelet {
 
                                 getC().hideIt(objectName);
 
-                                List<Thing> vision = Collections.synchronizedList((List<Thing>) getVisionMO().getI());
+                                List<Thing> vision = (List<Thing>) getVisionMO().getI();
 
                                 List<Thing> thingsA = vision.stream().filter(v -> v.getName().equals(objectName)).collect(Collectors.toList());
 

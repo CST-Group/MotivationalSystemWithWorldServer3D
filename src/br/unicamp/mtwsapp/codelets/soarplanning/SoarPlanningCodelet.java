@@ -55,9 +55,7 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
     public static final String OUTPUT_CURRENT_SOAR_PLAN_MO = "OUTPUT_CURRENT_SOAR_PLAN_MO";
 
-    public static final String INPUT_FOODS_MO = "INPUT_FOODS_MO";
-
-    public static final String INPUT_JEWELS_MO = "INPUT_JEWELS_MO";
+    public static final String KNOWN_JEWELS = "KNOWN_JEWELS";
 
     public SoarPlanningCodelet(String id) {
         this.setId(id);
@@ -92,7 +90,7 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
         }
 
         if (getInputJewelsMO() == null) {
-            setInputJewelsMO((MemoryObject) getInput(INPUT_JEWELS_MO));
+            setInputJewelsMO((MemoryObject) getInput(KNOWN_JEWELS));
         }
 
         if (getInputGoalMO() == null) {
@@ -114,7 +112,8 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
     public void proc() {
         if (isInit()) {
 
-            processDataToAbstractObject();
+            //if(getJsoar().getPhase() == 0)
+                processDataToAbstractObject();
 
             if(getDebugState() == 0)
                 getJsoar().step();
@@ -136,7 +135,7 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
 
         AbstractObject il = null;
 
-        List<Thing> jewelThings = new CopyOnWriteArrayList(((List<Thing>) getInputJewelsMO().getI()));
+        List<Thing> jewelThings = (List<Thing>) getInputJewelsMO().getI();
         Goal goal = (Goal) getInputGoalMO().getI();
 
         if (jewelThings != null && goal != null) {
@@ -158,7 +157,6 @@ public class SoarPlanningCodelet extends br.unicamp.cst.bindings.soar.JSoarCodel
         AbstractObject perceptionAO = new AbstractObject("PERCEPTION");
 
         AbstractObject jewelsAO = null;
-        AbstractObject foodsAO = null;
 
         if (jewelThings != null) {
             jewelsAO = thingsToAbstractObject(jewelThings, "JEWELS");

@@ -5,6 +5,7 @@ import br.unicamp.cst.core.entities.MemoryObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import br.unicamp.cst.core.exceptions.CodeletActivationBoundsException;
@@ -37,9 +38,18 @@ public class Vision extends Codelet {
     @Override
     public void proc() {
         getC().updateState();
+
         List<Thing> lt = Collections.synchronizedList(new ArrayList<>());
+
         lt.addAll(getC().getThingsInVision());
+
         getVisionMO().setI(lt);
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

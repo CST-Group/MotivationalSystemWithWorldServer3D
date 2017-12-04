@@ -27,15 +27,8 @@ public class SoarPlanSelectionCodelet extends PlanSelectionCodelet {
 
         if (first.isPresent()) {
             Map.Entry<Integer, Plan> soarPlanEntry = first.get();
-            Comparator<SoarJewel> comparator = new Comparator<SoarJewel>() {
-                @Override
-                public int compare(SoarJewel thing1, SoarJewel thing2) {
-                    int nearThing = calculateDistanceToJewel(thing1, getCreature()) < calculateDistanceToJewel(thing2, getCreature()) ? 1 : 0;
-                    return nearThing;
-                }
-            };
 
-            Collections.sort(((SoarPlan) soarPlanEntry.getValue().getContent()).getSoarJewels(), comparator);
+            ((SoarPlan) soarPlanEntry.getValue().getContent()).getSoarJewels().sort(Comparator.comparing(soarJewel -> soarJewel.getDistance()));
 
             plan = soarPlanEntry.getValue();
         }
@@ -52,11 +45,13 @@ public class SoarPlanSelectionCodelet extends PlanSelectionCodelet {
 
             for (SoarJewel soarJewel : ((SoarPlan) plan.getContent()).getSoarJewels()) {
 
-                List<String> jewelsCollected = Collections.synchronizedList((List<String>)(getInputDataMC().getI(0)));
+                List<String> jewelsCollected = (List<String>)(getInputDataMC().getI(0));
                 Optional<String> first = jewelsCollected.stream().filter(t -> t.equals(soarJewel.getName())).findFirst();
 
-                if (first.isPresent())
+                if (first.isPresent()) {
                     counter++;
+                    soarJewel.setCaptured(1);
+                }
             }
 
             if (counter == 3) {
