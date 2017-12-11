@@ -9,17 +9,20 @@ import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.MovingAverage;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.util.Rotation;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -29,6 +32,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by du on 06/04/17.
@@ -61,7 +65,7 @@ public class GenerateReport {
                 Type listType = new TypeToken<Graph>(){}.getType();
                 Graph graph = gson.fromJson(sResult,  listType);
 
-                createChart(graph, graph.title);
+                createChart(graph, graph.title, 1);
 
                 System.out.println("\n\nGrafico:"+graph.title);
 
@@ -151,26 +155,27 @@ public class GenerateReport {
     }
 
 
-    private static ChartFrame createChart(Graph graph, String title){
+    private static ChartFrame createChart(Graph graph, String title, int type){
 
-        XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+        JFreeChart chart = null;
 
-        graph.results.stream().forEach(result -> {
-            List<XYSeries> xySeries =  xySeriesCollection.getSeries();
-            List<XYSeries> foundSerie = xySeries.stream().filter(xy -> xy.getKey().equals(result.variableName)).collect(Collectors.toList());
-            if(foundSerie.size() > 0){
-                foundSerie.get(0).add((double)result.x, (double)result.y);
-            }
-            else{
-                XYSeries serie = new XYSeries(result.variableName);
-                serie.add((double)result.x, (double)result.y);
-                xySeriesCollection.addSeries(serie);
-            }
+        if(type == 0) {
+
+            XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
+
+            graph.results.stream().forEach(result -> {
+                List<XYSeries> xySeries = xySeriesCollection.getSeries();
+                List<XYSeries> foundSerie = xySeries.stream().filter(xy -> xy.getKey().equals(result.variableName)).collect(Collectors.toList());
+                if (foundSerie.size() > 0) {
+                    foundSerie.get(0).add((double) result.x, (double) result.y);
+                } else {
+                    XYSeries serie = new XYSeries(result.variableName);
+                    serie.add((double) result.x, (double) result.y);
+                    xySeriesCollection.addSeries(serie);
+                }
 
 
-
-
-        });
+            });
 
 
         /*XYSeries experimentAverage = new XYSeries("Experiments' Average");
@@ -200,54 +205,91 @@ public class GenerateReport {
 
         xySeriesCollection.addSeries(experimentAverage);*/
 
-        XYLineAndShapeRenderer renderer0 = new XYLineAndShapeRenderer();
 
 
-        final JFreeChart chart = ChartFactory.createXYLineChart(
-                title,
-                graph.xTitle,
-                graph.yTitle,
-                xySeriesCollection,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false
-        );
 
-        //TimeSeries dataset3 = MovingAverage.createMovingAverage(t1, "LT", 49, 49);
+            chart = ChartFactory.createXYLineChart(
+                    title,
+                    graph.xTitle,
+                    graph.yTitle,
+                    xySeriesCollection,
+                    PlotOrientation.VERTICAL,
+                    true,
+                    true,
+                    false
+            );
 
-        //XYDataset experimentAverage = MovingAverage.createMovingAverage(xySeriesCollection, "Experiment Average", 50, 0);
+            //TimeSeries dataset3 = MovingAverage.createMovingAverage(t1, "LT", 49, 49);
 
-
-        XYPlot xyPlot = (XYPlot) chart.getPlot();
-        //xyPlot.setDataset(0, experimentAverage);
-        xyPlot.setDomainCrosshairVisible(true);
-        xyPlot.setRangeCrosshairVisible(true);
+            //XYDataset experimentAverage = MovingAverage.createMovingAverage(xySeriesCollection, "Experiment Average", 50, 0);
 
 
-        MyRenderer renderer = new MyRenderer(true, false, 600);
-        xyPlot.setRenderer(renderer);
-        renderer.setSeriesShape(10, circle);
-        renderer.setSeriesPaint(10, line);
-        renderer.setUseFillPaint(true);
-        renderer.setSeriesShapesFilled(10, true);
-        renderer.setSeriesShapesVisible(10, true);
-        renderer.setUseOutlinePaint(true);
-        renderer.setSeriesOutlinePaint(10, line);
-        ValueAxis range = xyPlot.getRangeAxis();
-        range.setLowerBound(0.5);
+            XYPlot xyPlot = (XYPlot) chart.getPlot();
+            //xyPlot.setDataset(0, experimentAverage);
+            xyPlot.setDomainCrosshairVisible(true);
+            xyPlot.setRangeCrosshairVisible(true);
 
-        Font font3 = new Font("Dialog", Font.PLAIN, 20);
-        xyPlot.getDomainAxis().setLabelFont(font3);
-        xyPlot.getRangeAxis().setLabelFont(font3);
 
-        NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
-        domain.setRange(0.00, 600);
+            MyRenderer renderer = new MyRenderer(true, false, 600);
+            xyPlot.setRenderer(renderer);
+            renderer.setSeriesShape(10, circle);
+            renderer.setSeriesPaint(10, line);
+            renderer.setUseFillPaint(true);
+            renderer.setSeriesShapesFilled(10, true);
+            renderer.setSeriesShapesVisible(10, true);
+            renderer.setUseOutlinePaint(true);
+            renderer.setSeriesOutlinePaint(10, line);
+            ValueAxis range = xyPlot.getRangeAxis();
+            range.setLowerBound(0.5);
 
-        xyPlot.setBackgroundPaint(Color.lightGray);
-        xyPlot.setDomainGridlinePaint(Color.white);
-        xyPlot.setRangeGridlinePaint(Color.white);
-        chart.setBackgroundPaint(Color.white);
+            Font font3 = new Font("Dialog", Font.PLAIN, 20);
+            xyPlot.getDomainAxis().setLabelFont(font3);
+            xyPlot.getRangeAxis().setLabelFont(font3);
+
+            NumberAxis domain = (NumberAxis) xyPlot.getDomainAxis();
+            domain.setRange(0.00, 600);
+
+            xyPlot.setBackgroundPaint(Color.lightGray);
+            xyPlot.setDomainGridlinePaint(Color.white);
+            xyPlot.setRangeGridlinePaint(Color.white);
+            chart.setBackgroundPaint(Color.white);
+
+        } else {
+
+            DefaultPieDataset dataset = new DefaultPieDataset();
+
+            List<String> strings =  graph.results.stream()
+                    .map(x -> x.variableName)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            for (String string: strings) {
+
+                List<Result> items = graph.results.stream().filter(x->x.variableName.equals(string) && ((Double)x.y) == 1d).collect(Collectors.toList());
+
+                Double value = new Double((items.size()/ (double)(graph.results.size()/strings.size()))*100);
+                dataset.setValue(string + " = " + String.valueOf(Math.round(value)) + "%", value);
+            }
+
+
+            chart = ChartFactory.createPieChart3D(
+                    graph.title,  // chart title
+                    dataset,             // data
+                    true,               // include legend
+                    true,
+                    false
+            );
+
+            PiePlot3D plot = (PiePlot3D) chart.getPlot();
+            plot.setStartAngle(180);
+            plot.setDirection(Rotation.CLOCKWISE);
+            plot.setForegroundAlpha(0.65f);
+            plot.setNoDataMessage("No data to display");
+            plot.setLabelFont(new Font("Dialog", Font.PLAIN, 13));
+            plot.setNoDataMessage("No data available");
+            plot.setCircular(true);
+            plot.setLabelGap(0.02);
+        }
 
         ChartFrame frame = new ChartFrame(title, chart);
         frame.pack();

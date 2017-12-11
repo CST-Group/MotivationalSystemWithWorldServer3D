@@ -567,6 +567,7 @@ public class AgentMind extends Mind {
         simulationController.addMO(outputEsteemDriveMO);
 
         simulationController.setPlansSetMO(outputPlansSetMO);
+        simulationController.setPlanSelectedMO(outputSelectedPlan);
 
         simulationController.setCreatureInnerSenseMO(innerSenseMO);
         simulationController.setCreature(env.c);
