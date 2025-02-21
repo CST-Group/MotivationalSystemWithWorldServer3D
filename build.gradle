@@ -1,0 +1,90 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClassName = 'br.unicamp.mtwsapp.application.ExperimentMain'
+}
+
+version = '0.0.1' 
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+    }
+    maven {
+        url "https://artifacts.camunda.com/artifactory/public/"
+    }
+    maven { url 'https://jitpack.io' }
+
+}
+
+configurations.all {
+    exclude group: "com.google.collections", module: "google-collections"
+}
+
+dependencies {
+    implementation 'com.github.CST-Group:cst:0.2.1'
+    implementation 'com.github.CST-Group:WS3DProxy:0.0.3'
+    implementation 'com.soartech:jsoar-core:5.1.1'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'org.apache.commons:commons-math3:3.6.1' 
+    implementation 'org.swinglabs:swingx:1.6'
+    implementation 'org.xerial:sqlite-jdbc:3.7.2'
+    implementation 'log4j:log4j:1.2.16'
+    implementation 'org.json:json:20250107'
+    implementation 'com.fuzzylite:jfuzzylite:5.0'
+    implementation 'jfree:jfreechart:1.0.13'
+    implementation 'jfree:jcommon:1.0.16'
+    implementation 'org.dockingframes:docking-frames-core:1.1.1'
+    implementation 'org.dockingframes:docking-frames-common:1.1.1'
+    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'com.google.guava:guava:r03'
+    implementation 'org.json:json:20180813'
+    modules {
+        module("com.google.collections:google-collections") {
+            replacedBy("com.google.guava:guava", "Guava supersedes google-collections")
+        }
+    }
+    testImplementation group: 'junit', name: 'junit', version: '4.9'
+}
+
+tasks.withType(Tar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Copy).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Zip).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11) 
+    }
+}
+
+jar {
+    enabled = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier = 'full'
+    manifest {
+      attributes(
+        'Main-Class': mainClassName
+      )
+    }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}

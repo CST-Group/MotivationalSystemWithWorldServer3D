@@ -3,10 +3,11 @@
 .idea/MotivationalSystemWithWorldServer3D.iml
 .idea/modules.xml
 .idea/workspace.xml
-build/empty/
-build/generated-sources/
+build/
 test/
 dist
 MotivationalSystemWithWorldServer3D.iml
 out
 reportFiles/
+.gradle/
+.nb-gradle/
